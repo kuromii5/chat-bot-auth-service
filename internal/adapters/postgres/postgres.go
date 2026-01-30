@@ -10,8 +10,6 @@ import (
 	"github.com/kuromii5/chat-bot-auth-service/config"
 )
 
-var UniqueViolationErrorCode = "23505"
-
 func New(cfg *config.DatabaseConfig) (*sqlx.DB, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
