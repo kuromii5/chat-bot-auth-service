@@ -10,9 +10,11 @@ import (
 
 	"github.com/kuromii5/chat-bot-auth-service/config"
 	"github.com/kuromii5/chat-bot-auth-service/internal/adapters/postgres"
+	"github.com/kuromii5/chat-bot-auth-service/internal/adapters/postgres/token"
 	"github.com/kuromii5/chat-bot-auth-service/internal/adapters/postgres/user"
 	httpHandlers "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http"
 	"github.com/kuromii5/chat-bot-auth-service/internal/service"
+	"github.com/kuromii5/chat-bot-auth-service/pkg/jwt"
 	"github.com/kuromii5/chat-bot-auth-service/pkg/validator"
 )
 
@@ -31,7 +33,9 @@ func main() {
 	defer db.Close()
 
 	userRepo := user.NewRepository(db)
-	authService := service.NewService(userRepo)
+	tokenRepo := token.NewRepository(db)
+	jwtManager := jwt.NewJWTManager(cfg.JWT.Secret, cfg.JWT.AccessTokenExpiry, cfg.JWT.RefreshTokenExpiry)
+	authService := service.NewService(userRepo, tokenRepo, jwtManager)
 	authHandler := httpHandlers.NewHandler(authService)
 
 	router := httpHandlers.NewRouter(authHandler)

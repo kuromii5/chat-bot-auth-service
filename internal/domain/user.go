@@ -25,15 +25,3 @@ type User struct {
 	UpdatedAt    time.Time  `db:"updated_at"`
 	DeletedAt    *time.Time `db:"deleted_at"`
 }
-
-type RefreshToken struct {
-	ID        uuid.UUID  `db:"id"`
-	UserID    uuid.UUID  `db:"user_id"`
-	TokenHash string     `db:"token_hash"`
-	UserAgent *string    `db:"user_agent"`
-	IPAddress *string    `db:"ip_address"`
-	IsRevoked bool       `db:"is_revoked"`
-	ExpiresAt time.Time  `db:"expires_at"`
-	CreatedAt time.Time  `db:"created_at"`
-	RevokedAt *time.Time `db:"revoked_at"`
-}

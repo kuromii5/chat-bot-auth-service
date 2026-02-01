@@ -40,7 +40,7 @@ func (r *Repository) Create(ctx context.Context, user *domain.User) (*domain.Use
 	return user, nil
 }
 
-func (r *Repository) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
+func (r *Repository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
 	var user domain.User
 	err := r.db.GetContext(ctx, &user, findByEmailQuery, email)
 	if err != nil {
@@ -50,7 +50,7 @@ func (r *Repository) FindByEmail(ctx context.Context, email string) (*domain.Use
 	return &user, nil
 }
 
-func (r *Repository) FindByUsername(ctx context.Context, username string) (*domain.User, error) {
+func (r *Repository) GetByUsername(ctx context.Context, username string) (*domain.User, error) {
 	var user domain.User
 	err := r.db.GetContext(ctx, &user, findByUsernameQuery, username)
 	if err != nil {

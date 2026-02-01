@@ -10,7 +10,7 @@ import (
 	"github.com/kuromii5/chat-bot-auth-service/pkg/wrapper"
 )
 
-type RegisterRequest struct {
+type registerRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=8"`
 	Username string `json:"username" validate:"required,min=3,max=32"`
@@ -18,7 +18,7 @@ type RegisterRequest struct {
 }
 
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
-	var req RegisterRequest
+	var req registerRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		wrapper.WrapError(w, r, err)
 		return

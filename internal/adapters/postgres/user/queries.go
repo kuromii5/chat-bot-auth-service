@@ -14,14 +14,14 @@ const (
     `
 
 	findByEmailQuery = `
-	SELECT id, email, password_hash, username, role, is_verified, token_version, created_at, updated_at
-	FROM core.users
-	WHERE email = $1
+		SELECT id, email, password_hash, token_version, created_at, updated_at
+		FROM auth.users
+		WHERE email = $1
 	`
 
 	findByUsernameQuery = `
-	SELECT id, email, password_hash, username, role, is_verified, token_version, created_at, updated_at
-	FROM core.users
-	WHERE username = $1
+		SELECT id, email, password_hash, token_version, created_at, updated_at
+		FROM auth.users
+		WHERE username = $1
 	`
 )
