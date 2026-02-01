@@ -22,6 +22,7 @@ func NewRouter(authHandler *Handler) http.Handler {
 		r.Post("/register", authHandler.Register)
 		r.Post("/login", authHandler.Login)
 		r.Post("/logout", authHandler.Logout)
+		r.Post("/refresh", authHandler.Refresh)
 	})
 
 	return r
