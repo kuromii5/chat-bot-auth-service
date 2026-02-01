@@ -28,15 +28,12 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role := domain.UserRole(req.Role)
-	registerReq := service.RegisterRequest{
+	resp, err := h.service.Register(r.Context(), service.RegisterRequest{
 		Email:    req.Email,
 		Password: req.Password,
 		Username: req.Username,
-		Role:     role,
-	}
-
-	resp, err := h.service.Register(r.Context(), registerReq)
+		Role:     domain.UserRole(req.Role),
+	})
 	if err != nil {
 		wrapper.WrapError(w, r, err)
 		return

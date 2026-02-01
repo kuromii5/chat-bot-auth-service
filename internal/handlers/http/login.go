@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/kuromii5/chat-bot-auth-service/internal/domain"
 	"github.com/kuromii5/chat-bot-auth-service/internal/service"
 	"github.com/kuromii5/chat-bot-auth-service/pkg/wrapper"
 )
@@ -37,19 +36,13 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	userAgent := r.Header.Get("User-Agent")
 
-	loginReq := service.LoginRequest{
+	loginResp, err := h.service.Login(r.Context(), service.LoginRequest{
 		Email:     req.Email,
 		Password:  req.Password,
 		UserAgent: userAgent,
 		IPAddress: ip,
-	}
-
-	loginResp, err := h.service.Login(r.Context(), loginReq)
+	})
 	if err != nil {
-		if err == domain.ErrInvalidCredentials {
-			wrapper.WrapError(w, r, err)
-			return
-		}
 		wrapper.WrapError(w, r, err)
 		return
 	}

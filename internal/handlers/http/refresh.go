@@ -31,13 +31,11 @@ func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
 	}
 	userAgent := r.Header.Get("User-Agent")
 
-	refreshReq := service.RefreshRequest{
+	resp, err := h.service.Refresh(r.Context(), service.RefreshRequest{
 		OldRefreshTokenRaw: req.RefreshToken,
 		UserAgent:          userAgent,
 		IPAddress:          ip,
-	}
-
-	resp, err := h.service.Refresh(r.Context(), refreshReq)
+	})
 	if err != nil {
 		wrapper.WrapError(w, r, err)
 		return
