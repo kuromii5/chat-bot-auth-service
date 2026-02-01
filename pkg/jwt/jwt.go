@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/kuromii5/chat-bot-auth-service/internal/domain"
 )
 
 type JWTManager struct {
@@ -18,7 +19,8 @@ type JWTManager struct {
 
 type UserClaims struct {
 	jwt.RegisteredClaims
-	UserID uuid.UUID `json:"user_id"`
+	UserID uuid.UUID   `json:"user_id"`
+	Role   domain.Role `json:"role"`
 }
 
 func NewJWTManager(secretKey string, accessExpiry time.Duration, refreshExpiry time.Duration) *JWTManager {
@@ -37,13 +39,14 @@ func (m *JWTManager) RefreshTokenExpiry() time.Duration {
 	return m.refreshExpiry
 }
 
-func (m *JWTManager) GenerateAccess(userID uuid.UUID) (string, error) {
+func (m *JWTManager) GenerateAccess(userID uuid.UUID, role domain.Role) (string, error) {
 	claims := UserClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(m.accessExpiry)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 		UserID: userID,
+		Role:   role,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

@@ -32,7 +32,7 @@ func (s *Service) Login(ctx context.Context, req LoginRequest) (*LoginResponse, 
 		return nil, domain.ErrInvalidCredentials
 	}
 
-	accessToken, err := s.jwtManager.GenerateAccess(user.ID)
+	accessToken, err := s.jwtManager.GenerateAccess(user.ID, user.Role)
 	if err != nil {
 		return nil, err
 	}

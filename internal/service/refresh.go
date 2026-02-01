@@ -36,7 +36,7 @@ func (s *Service) Refresh(ctx context.Context, req RefreshRequest) (*RefreshResp
 		return nil, domain.ErrTokenExpired
 	}
 
-	newAccessToken, err := s.jwtManager.GenerateAccess(tokenDoc.UserID)
+	newAccessToken, err := s.jwtManager.GenerateAccess(tokenDoc.UserID, tokenDoc.Role)
 	if err != nil {
 		return nil, err
 	}
@@ -48,15 +48,13 @@ func (s *Service) Refresh(ctx context.Context, req RefreshRequest) (*RefreshResp
 		return nil, err
 	}
 
-	newRefresh := &domain.RefreshToken{
+	if err := s.tokenRepo.Create(ctx, &domain.RefreshToken{
 		UserID:    tokenDoc.UserID,
 		TokenHash: newHash,
 		UserAgent: &req.UserAgent,
 		IPAddress: &req.IPAddress,
 		ExpiresAt: time.Now().Add(s.jwtManager.RefreshTokenExpiry()),
-	}
-
-	if err := s.tokenRepo.Create(ctx, newRefresh); err != nil {
+	}); err != nil {
 		return nil, err
 	}
 

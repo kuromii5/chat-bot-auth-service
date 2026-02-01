@@ -10,6 +10,7 @@ type RefreshToken struct {
 	ID        uuid.UUID  `db:"id"`
 	UserID    uuid.UUID  `db:"user_id"`
 	TokenHash string     `db:"token_hash"`
+	Role      Role       `db:"role"`
 	UserAgent *string    `db:"user_agent"`
 	IPAddress *string    `db:"ip_address"`
 	IsRevoked bool       `db:"is_revoked"`

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -14,30 +13,28 @@ type RegisterRequest struct {
 	Email    string
 	Password string
 	Username string
-	Role     domain.UserRole
+	Role     domain.Role
 }
 
 type RegisterResponse struct {
 	UserID   uuid.UUID
 	Email    string
 	Username string
-	Role     domain.UserRole
+	Role     domain.Role
 }
 
 func (s *Service) Register(ctx context.Context, req RegisterRequest) (*RegisterResponse, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, fmt.Errorf("failed to hash password")
+		return nil, err
 	}
 
-	user := &domain.User{
+	user, err := s.userRepo.Create(ctx, &domain.User{
 		Email:        req.Email,
 		PasswordHash: string(hashedPassword),
 		Username:     req.Username,
 		Role:         req.Role,
-	}
-
-	user, err = s.userRepo.Create(ctx, user)
+	})
 	if err != nil {
 		return nil, err
 	}

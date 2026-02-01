@@ -32,7 +32,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		Email:    req.Email,
 		Password: req.Password,
 		Username: req.Username,
-		Role:     domain.UserRole(req.Role),
+		Role:     domain.Role(req.Role),
 	})
 	if err != nil {
 		wrapper.WrapError(w, r, err)

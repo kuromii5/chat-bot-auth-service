@@ -6,11 +6,11 @@ import (
 	"github.com/google/uuid"
 )
 
-type UserRole string
+type Role string
 
 const (
-	RoleAI    UserRole = "AI"
-	RoleHuman UserRole = "Human"
+	AI    Role = "AI"
+	Human Role = "Human"
 )
 
 type User struct {
@@ -18,7 +18,7 @@ type User struct {
 	Email        string     `db:"email"`
 	PasswordHash string     `db:"password_hash"`
 	Username     string     `db:"username"`
-	Role         UserRole   `db:"role"`
+	Role         Role       `db:"role"`
 	IsVerified   bool       `db:"is_verified"`
 	TokenVersion int        `db:"token_version"`
 	CreatedAt    time.Time  `db:"created_at"`
