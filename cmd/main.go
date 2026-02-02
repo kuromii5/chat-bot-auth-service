@@ -10,8 +10,6 @@ import (
 
 	"github.com/kuromii5/chat-bot-auth-service/config"
 	"github.com/kuromii5/chat-bot-auth-service/internal/adapters/postgres"
-	"github.com/kuromii5/chat-bot-auth-service/internal/adapters/postgres/token"
-	"github.com/kuromii5/chat-bot-auth-service/internal/adapters/postgres/user"
 	httpHandlers "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http"
 	"github.com/kuromii5/chat-bot-auth-service/internal/service"
 	"github.com/kuromii5/chat-bot-auth-service/pkg/jwt"
@@ -26,16 +24,14 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	db, err := postgres.New(&cfg.Database)
+	pg, err := postgres.New(&cfg.Database)
 	if err != nil {
 		logrus.Fatal("Failed to connect to database", err)
 	}
-	defer db.Close()
+	defer pg.DB.Close()
 
-	userRepo := user.NewRepository(db)
-	tokenRepo := token.NewRepository(db)
 	jwtManager := jwt.NewJWTManager(cfg.JWT.Secret, cfg.JWT.AccessTokenExpiry, cfg.JWT.RefreshTokenExpiry)
-	authService := service.NewService(userRepo, tokenRepo, jwtManager)
+	authService := service.NewService(pg, pg, jwtManager)
 	authHandler := httpHandlers.NewHandler(authService)
 
 	router := httpHandlers.NewRouter(authHandler)

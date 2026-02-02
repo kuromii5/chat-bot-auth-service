@@ -23,7 +23,7 @@ type RefreshResponse struct {
 func (s *Service) Refresh(ctx context.Context, req RefreshRequest) (*RefreshResponse, error) {
 	oldHash := jwt.SHA256(req.OldRefreshTokenRaw)
 
-	tokenDoc, err := s.tokenRepo.Get(ctx, oldHash)
+	tokenDoc, err := s.tokenRepo.GetToken(ctx, oldHash)
 	if err != nil || tokenDoc == nil {
 		return nil, domain.ErrTokenNotFound
 	}
@@ -44,11 +44,11 @@ func (s *Service) Refresh(ctx context.Context, req RefreshRequest) (*RefreshResp
 	newRefreshTokenRaw := uuid.New().String()
 	newHash := jwt.SHA256(newRefreshTokenRaw)
 
-	if err := s.tokenRepo.Revoke(ctx, oldHash); err != nil {
+	if err := s.tokenRepo.RevokeToken(ctx, oldHash); err != nil {
 		return nil, err
 	}
 
-	if err := s.tokenRepo.Create(ctx, &domain.RefreshToken{
+	if err := s.tokenRepo.CreateToken(ctx, &domain.RefreshToken{
 		UserID:    tokenDoc.UserID,
 		TokenHash: newHash,
 		UserAgent: &req.UserAgent,

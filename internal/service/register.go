@@ -29,7 +29,7 @@ func (s *Service) Register(ctx context.Context, req RegisterRequest) (*RegisterR
 		return nil, err
 	}
 
-	user, err := s.userRepo.Create(ctx, &domain.User{
+	user, err := s.userRepo.CreateUser(ctx, &domain.User{
 		Email:        req.Email,
 		PasswordHash: string(hashedPassword),
 		Username:     req.Username,

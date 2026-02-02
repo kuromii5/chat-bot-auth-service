@@ -23,7 +23,7 @@ type LoginResponse struct {
 }
 
 func (s *Service) Login(ctx context.Context, req LoginRequest) (*LoginResponse, error) {
-	user, err := s.userRepo.GetByEmail(ctx, req.Email)
+	user, err := s.userRepo.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 		return nil, domain.ErrInvalidCredentials
 	}
@@ -48,7 +48,7 @@ func (s *Service) Login(ctx context.Context, req LoginRequest) (*LoginResponse, 
 		ExpiresAt: time.Now().Add(s.jwtManager.RefreshTokenExpiry()),
 	}
 
-	if err := s.tokenRepo.Create(ctx, refresh); err != nil {
+	if err := s.tokenRepo.CreateToken(ctx, refresh); err != nil {
 		return nil, err
 	}
 
@@ -60,5 +60,5 @@ func (s *Service) Login(ctx context.Context, req LoginRequest) (*LoginResponse, 
 
 func (s *Service) Logout(ctx context.Context, refreshToken string) error {
 	hashedToken := jwt.SHA256(refreshToken)
-	return s.tokenRepo.Revoke(ctx, hashedToken)
+	return s.tokenRepo.RevokeToken(ctx, hashedToken)
 }

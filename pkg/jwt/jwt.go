@@ -3,7 +3,6 @@ package jwt
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -19,8 +18,8 @@ type JWTManager struct {
 
 type UserClaims struct {
 	jwt.RegisteredClaims
-	UserID uuid.UUID   `json:"user_id"`
-	Role   domain.Role `json:"role"`
+	UserID uuid.UUID `json:"user_id"`
+	Role   string    `json:"role"`
 }
 
 func NewJWTManager(secretKey string, accessExpiry time.Duration, refreshExpiry time.Duration) *JWTManager {
@@ -46,31 +45,11 @@ func (m *JWTManager) GenerateAccess(userID uuid.UUID, role domain.Role) (string,
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 		UserID: userID,
-		Role:   role,
+		Role:   string(role),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(m.secretKey))
-}
-
-func (m *JWTManager) Verify(tokenStr string) (*UserClaims, error) {
-	token, err := jwt.ParseWithClaims(tokenStr, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(m.secretKey), nil
-	})
-
-	if err != nil {
-		return nil, fmt.Errorf("invalid token: %w", err)
-	}
-
-	claims, ok := token.Claims.(*UserClaims)
-	if !ok || !token.Valid {
-		return nil, fmt.Errorf("invalid token claims")
-	}
-
-	return claims, nil
 }
 
 func SHA256(input string) string {

@@ -1,4 +1,4 @@
-package user
+package postgres
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 	"github.com/kuromii5/chat-bot-auth-service/internal/domain"
 )
 
-func (r *Repository) Create(ctx context.Context, user *domain.User) (*domain.User, error) {
-	tx, err := r.db.BeginTxx(ctx, nil)
+func (r *Postgres) CreateUser(ctx context.Context, user *domain.User) (*domain.User, error) {
+	tx, err := r.DB.BeginTxx(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
@@ -40,9 +40,9 @@ func (r *Repository) Create(ctx context.Context, user *domain.User) (*domain.Use
 	return user, nil
 }
 
-func (r *Repository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
+func (r *Postgres) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {
 	var user domain.User
-	err := r.db.GetContext(ctx, &user, findByEmailQuery, email)
+	err := r.DB.GetContext(ctx, &user, findByEmailQuery, email)
 	if err != nil {
 		return nil, fmt.Errorf("user not found: %w", err)
 	}
@@ -50,9 +50,9 @@ func (r *Repository) GetByEmail(ctx context.Context, email string) (*domain.User
 	return &user, nil
 }
 
-func (r *Repository) GetByUsername(ctx context.Context, username string) (*domain.User, error) {
+func (r *Postgres) GetUserByUsername(ctx context.Context, username string) (*domain.User, error) {
 	var user domain.User
-	err := r.db.GetContext(ctx, &user, findByUsernameQuery, username)
+	err := r.DB.GetContext(ctx, &user, findByUsernameQuery, username)
 	if err != nil {
 		return nil, fmt.Errorf("user not found: %w", err)
 	}
