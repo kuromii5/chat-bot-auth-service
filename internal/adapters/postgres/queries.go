@@ -14,8 +14,19 @@ const (
 	`
 
 	getRefreshTokenQuery = `
-        SELECT id, user_id, token_hash, user_agent, ip_address, is_revoked, expires_at, created_at, revoked_at
-        FROM auth.refresh_tokens
+        SELECT
+			rt.id
+			, rt.user_id
+			, rt.token_hash
+			, rt.user_agent
+			, rt.ip_address
+			, rt.is_revoked
+			, rt.expires_at
+			, rt.created_at
+			, rt.revoked_at
+			, u.role
+        FROM auth.refresh_tokens rt
+		JOIN auth.users u ON rt.user_id = u.id
         WHERE token_hash = $1
     `
 
@@ -29,25 +40,25 @@ const (
 // user queries
 const (
 	createAuthUserQuery = `
-        INSERT INTO auth.users (email, password_hash)
-        VALUES ($1, $2)
-        RETURNING id, created_at, token_version
+        INSERT INTO auth.users (email, password_hash, role)
+        VALUES ($1, $2, $3)
+        RETURNING id, created_at, token_version, role
     `
 
 	createProfileQuery = `
-        INSERT INTO core.profiles (user_id, username, role)
-        VALUES ($1, $2, $3)
-        RETURNING username, role
+        INSERT INTO core.profiles (user_id, username)
+        VALUES ($1, $2)
+        RETURNING user_id
     `
 
-	findByEmailQuery = `
-		SELECT id, email, password_hash, token_version, created_at, updated_at
+	getUserByEmailQuery = `
+		SELECT id, email, password_hash, token_version, created_at, updated_at, role
 		FROM auth.users
 		WHERE email = $1
 	`
 
-	findByUsernameQuery = `
-		SELECT id, email, password_hash, token_version, created_at, updated_at
+	getUserByUsernameQuery = `
+		SELECT id, email, password_hash, token_version, created_at, updated_at, role
 		FROM auth.users
 		WHERE username = $1
 	`
