@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/sirupsen/logrus"
 
@@ -26,9 +27,8 @@ func main() {
 
 	pg, err := postgres.New(&cfg.Database)
 	if err != nil {
-		logrus.Fatal("Failed to connect to database", err)
+		logrus.WithError(err).Fatal("Failed to connect to database")
 	}
-	defer pg.DB.Close()
 
 	jwtManager := jwt.NewJWTManager(cfg.JWT.Secret, cfg.JWT.AccessTokenExpiry, cfg.JWT.RefreshTokenExpiry)
 	authService := service.NewService(pg, pg, jwtManager)
@@ -36,11 +36,36 @@ func main() {
 
 	router := httpHandlers.NewRouter(authHandler)
 	server := httpHandlers.NewServer(cfg.Server.Host, cfg.Server.Port, router)
-	if err := server.Start(); err != nil {
+
+	errChan := make(chan error, 1)
+	go func() {
+		logrus.Infof("server address: %s", server.Addr())
+		if err := server.Start(); err != nil {
+			errChan <- err
+		}
+	}()
+
+	select {
+	case err := <-errChan:
 		logrus.WithError(err).Fatal("Failed to start server")
+		pg.DB.Close()
+		os.Exit(1)
+	case <-ctx.Done():
+		logrus.Info("Server shutdown...")
+
+		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer shutdownCancel()
+
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			logrus.WithError(err).Error("HTTP server shutdown failed, forcing close")
+		}
+
+		if err := pg.DB.Close(); err != nil {
+			logrus.WithError(err).Error("Database close failed")
+		}
 	}
 
-	server.WaitAndShutdown(ctx)
+	logrus.Info("Service shutdown successfully")
 }
 
 func setupLogger(level string) {
