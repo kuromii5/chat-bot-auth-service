@@ -35,6 +35,7 @@ func main() {
 	authHandler := httpHandlers.NewHandler(authService)
 
 	router := httpHandlers.NewRouter(authHandler)
+	httpHandlers.InitMetrics(cfg.Metrics.Port)
 	server := httpHandlers.NewServer(cfg.Server.Host, cfg.Server.Port, router)
 
 	errChan := make(chan error, 1)

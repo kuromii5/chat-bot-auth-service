@@ -14,6 +14,11 @@ type Config struct {
 	Database DatabaseConfig
 	JWT      JWTConfig
 	Log      LogConfig
+	Metrics  MetricsConfig
+}
+
+type MetricsConfig struct {
+	Port string
 }
 
 type ServerConfig struct {
@@ -75,6 +80,9 @@ func Load() (*Config, error) {
 		},
 		Log: LogConfig{
 			Level: viper.GetString("LOG_LEVEL"),
+		},
+		Metrics: MetricsConfig{
+			Port: viper.GetString("METRICS_PORT"),
 		},
 	}
 	return cfg, nil
