@@ -56,6 +56,7 @@ func main() {
 		if closeErr := pg.DB.Close(); closeErr != nil {
 			logrus.WithError(closeErr).Error("Database close failed")
 		}
+		return
 	case <-ctx.Done():
 		logrus.Info("Server shutdown...")
 
