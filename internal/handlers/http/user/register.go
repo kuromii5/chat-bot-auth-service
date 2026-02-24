@@ -1,11 +1,11 @@
-package http
+package user
 
 import (
 	"encoding/json"
 	"net/http"
 
 	"github.com/kuromii5/chat-bot-auth-service/internal/domain"
-	"github.com/kuromii5/chat-bot-auth-service/internal/service"
+	userservice "github.com/kuromii5/chat-bot-auth-service/internal/service/user"
 	"github.com/kuromii5/chat-bot-auth-service/pkg/validator"
 	"github.com/kuromii5/chat-bot-auth-service/pkg/wrapper"
 )
@@ -28,7 +28,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := h.service.Register(r.Context(), service.RegisterRequest{
+	resp, err := h.svc.Register(r.Context(), userservice.RegisterRequest{
 		Email:    req.Email,
 		Password: req.Password,
 		Username: req.Username,

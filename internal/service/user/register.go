@@ -1,4 +1,4 @@
-package service
+package user
 
 import (
 	"context"
@@ -30,7 +30,7 @@ func (s *Service) Register(ctx context.Context, req RegisterRequest) (*RegisterR
 		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
-	user, err := s.userRepo.CreateUser(ctx, &domain.User{
+	u, err := s.repo.CreateUser(ctx, &domain.User{
 		Email:        req.Email,
 		PasswordHash: string(hashedPassword),
 		Username:     req.Username,
@@ -41,9 +41,9 @@ func (s *Service) Register(ctx context.Context, req RegisterRequest) (*RegisterR
 	}
 
 	return &RegisterResponse{
-		UserID:   user.ID,
-		Email:    user.Email,
-		Username: user.Username,
-		Role:     user.Role,
+		UserID:   u.ID,
+		Email:    u.Email,
+		Username: u.Username,
+		Role:     u.Role,
 	}, nil
 }

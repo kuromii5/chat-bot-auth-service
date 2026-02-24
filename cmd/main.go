@@ -11,8 +11,11 @@ import (
 
 	"github.com/kuromii5/chat-bot-auth-service/config"
 	"github.com/kuromii5/chat-bot-auth-service/internal/adapters/postgres"
-	httpHandlers "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http"
-	"github.com/kuromii5/chat-bot-auth-service/internal/service"
+	httpserver "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http"
+	authhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/auth"
+	userhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/user"
+	"github.com/kuromii5/chat-bot-auth-service/internal/service/session"
+	userservice "github.com/kuromii5/chat-bot-auth-service/internal/service/user"
 	"github.com/kuromii5/chat-bot-auth-service/pkg/jwt"
 	"github.com/kuromii5/chat-bot-auth-service/pkg/validator"
 )
@@ -35,12 +38,17 @@ func main() {
 		cfg.JWT.AccessTokenExpiry,
 		cfg.JWT.RefreshTokenExpiry,
 	)
-	authService := service.NewService(pg, pg, jwtManager)
-	authHandler := httpHandlers.NewHandler(authService)
 
-	router := httpHandlers.NewRouter(authHandler)
-	httpHandlers.InitMetrics(cfg.Metrics.Port)
-	server := httpHandlers.NewServer(cfg.Server.Host, cfg.Server.Port, router)
+	userSvc := userservice.NewService(pg)
+	sessionSvc := session.NewService(pg, pg, jwtManager)
+
+	router := httpserver.NewRouter(
+		userhandler.NewHandler(userSvc),
+		authhandler.NewHandler(sessionSvc),
+	)
+
+	httpserver.InitMetrics(cfg.Metrics.Port)
+	server := httpserver.NewServer(cfg.Server.Host, cfg.Server.Port, router)
 
 	errChan := make(chan error, 1)
 	go func() {

@@ -8,7 +8,17 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func NewRouter(authHandler *Handler) http.Handler {
+type UserHandler interface {
+	Register(http.ResponseWriter, *http.Request)
+}
+
+type AuthHandler interface {
+	Login(http.ResponseWriter, *http.Request)
+	Logout(http.ResponseWriter, *http.Request)
+	Refresh(http.ResponseWriter, *http.Request)
+}
+
+func NewRouter(userH UserHandler, authH AuthHandler) http.Handler {
 	r := chi.NewRouter()
 	r.Use(
 		middleware.RequestID,
@@ -19,10 +29,10 @@ func NewRouter(authHandler *Handler) http.Handler {
 	)
 
 	r.Route("/api/v1/auth", func(r chi.Router) {
-		r.Post("/register", authHandler.Register)
-		r.Post("/login", authHandler.Login)
-		r.Post("/logout", authHandler.Logout)
-		r.Post("/refresh", authHandler.Refresh)
+		r.Post("/register", userH.Register)
+		r.Post("/login", authH.Login)
+		r.Post("/logout", authH.Logout)
+		r.Post("/refresh", authH.Refresh)
 	})
 
 	return r
