@@ -12,9 +12,18 @@ func (r *Postgres) CreateUser(ctx context.Context, user *domain.User) (*domain.U
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback()
+	defer func() {
+		_ = tx.Rollback() // no-op if tx already committed
+	}()
 
-	if err := tx.GetContext(ctx, user, createAuthUserQuery, user.Email, user.PasswordHash, user.Role); err != nil {
+	if err := tx.GetContext(
+		ctx,
+		user,
+		createAuthUserQuery,
+		user.Email,
+		user.PasswordHash,
+		user.Role,
+	); err != nil {
 		return nil, r.handleError(err, "email")
 	}
 

@@ -30,7 +30,11 @@ func main() {
 		logrus.WithError(err).Fatal("Failed to connect to database")
 	}
 
-	jwtManager := jwt.NewJWTManager(cfg.JWT.Secret, cfg.JWT.AccessTokenExpiry, cfg.JWT.RefreshTokenExpiry)
+	jwtManager := jwt.NewJWTManager(
+		cfg.JWT.Secret,
+		cfg.JWT.AccessTokenExpiry,
+		cfg.JWT.RefreshTokenExpiry,
+	)
 	authService := service.NewService(pg, pg, jwtManager)
 	authHandler := httpHandlers.NewHandler(authService)
 
@@ -49,8 +53,9 @@ func main() {
 	select {
 	case err := <-errChan:
 		logrus.WithError(err).Fatal("Failed to start server")
-		pg.DB.Close()
-		os.Exit(1)
+		if closeErr := pg.DB.Close(); closeErr != nil {
+			logrus.WithError(closeErr).Error("Database close failed")
+		}
 	case <-ctx.Done():
 		logrus.Info("Server shutdown...")
 

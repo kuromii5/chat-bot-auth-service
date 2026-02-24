@@ -11,7 +11,11 @@ type Service struct {
 	jwtManager *jwt.JWTManager
 }
 
-func NewService(userRepo ports.UserRepository, tokenRepo ports.RefreshTokenRepository, jwtManager *jwt.JWTManager) *Service {
+func NewService(
+	userRepo ports.UserRepository,
+	tokenRepo ports.RefreshTokenRepository,
+	jwtManager *jwt.JWTManager,
+) *Service {
 	return &Service{
 		userRepo:   userRepo,
 		tokenRepo:  tokenRepo,

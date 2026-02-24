@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/kuromii5/chat-bot-auth-service/internal/domain"
 	"github.com/kuromii5/chat-bot-auth-service/pkg/jwt"
 )
@@ -38,14 +40,14 @@ func (s *Service) Refresh(ctx context.Context, req RefreshRequest) (*RefreshResp
 
 	newAccessToken, err := s.jwtManager.GenerateAccess(tokenDoc.UserID, tokenDoc.Role)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("generate access token: %w", err)
 	}
 
 	newRefreshTokenRaw := uuid.New().String()
 	newHash := jwt.SHA256(newRefreshTokenRaw)
 
 	if err := s.tokenRepo.RevokeToken(ctx, oldHash); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("revoke token: %w", err)
 	}
 
 	if err := s.tokenRepo.CreateToken(ctx, &domain.RefreshToken{
@@ -55,7 +57,7 @@ func (s *Service) Refresh(ctx context.Context, req RefreshRequest) (*RefreshResp
 		IPAddress: &req.IPAddress,
 		ExpiresAt: time.Now().Add(s.jwtManager.RefreshTokenExpiry()),
 	}); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("create refresh token: %w", err)
 	}
 
 	return &RefreshResponse{

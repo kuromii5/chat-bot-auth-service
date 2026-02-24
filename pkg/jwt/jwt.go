@@ -3,10 +3,12 @@ package jwt
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+
 	"github.com/kuromii5/chat-bot-auth-service/internal/domain"
 )
 
@@ -22,7 +24,11 @@ type UserClaims struct {
 	Role   string    `json:"role"`
 }
 
-func NewJWTManager(secretKey string, accessExpiry time.Duration, refreshExpiry time.Duration) *JWTManager {
+func NewJWTManager(
+	secretKey string,
+	accessExpiry time.Duration,
+	refreshExpiry time.Duration,
+) *JWTManager {
 	return &JWTManager{
 		secretKey:     secretKey,
 		accessExpiry:  accessExpiry,
@@ -49,7 +55,11 @@ func (m *JWTManager) GenerateAccess(userID uuid.UUID, role domain.Role) (string,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(m.secretKey))
+	ss, err := token.SignedString([]byte(m.secretKey))
+	if err != nil {
+		return "", fmt.Errorf("failed to sign JWT: %w", err)
+	}
+	return ss, nil
 }
 
 func SHA256(input string) string {

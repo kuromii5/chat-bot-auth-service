@@ -2,12 +2,14 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/kuromii5/chat-bot-auth-service/internal/domain"
 	"github.com/kuromii5/chat-bot-auth-service/pkg/jwt"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type LoginRequest struct {
@@ -28,13 +30,16 @@ func (s *Service) Login(ctx context.Context, req LoginRequest) (*LoginResponse, 
 		return nil, domain.ErrInvalidCredentials
 	}
 
-	if err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
+	if err = bcrypt.CompareHashAndPassword(
+		[]byte(user.PasswordHash),
+		[]byte(req.Password),
+	); err != nil {
 		return nil, domain.ErrInvalidCredentials
 	}
 
 	accessToken, err := s.jwtManager.GenerateAccess(user.ID, user.Role)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("generate access token: %w", err)
 	}
 
 	refreshTokenStr := uuid.New().String()
@@ -49,7 +54,7 @@ func (s *Service) Login(ctx context.Context, req LoginRequest) (*LoginResponse, 
 	}
 
 	if err := s.tokenRepo.CreateToken(ctx, refresh); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("create refresh token: %w", err)
 	}
 
 	return &LoginResponse{
@@ -60,5 +65,8 @@ func (s *Service) Login(ctx context.Context, req LoginRequest) (*LoginResponse, 
 
 func (s *Service) Logout(ctx context.Context, refreshToken string) error {
 	hashedToken := jwt.SHA256(refreshToken)
-	return s.tokenRepo.RevokeToken(ctx, hashedToken)
+	if err := s.tokenRepo.RevokeToken(ctx, hashedToken); err != nil {
+		return fmt.Errorf("revoke token: %w", err)
+	}
+	return nil
 }

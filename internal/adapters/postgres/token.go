@@ -4,19 +4,35 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
+
 	"github.com/kuromii5/chat-bot-auth-service/internal/domain"
 )
 
 func (r *Postgres) CreateToken(ctx context.Context, t *domain.RefreshToken) error {
-	_, err := r.DB.ExecContext(ctx, createRefreshTokenQuery, t.UserID, t.TokenHash, t.UserAgent, t.IPAddress, t.ExpiresAt)
-	return err
+	_, err := r.DB.ExecContext(
+		ctx,
+		createRefreshTokenQuery,
+		t.UserID,
+		t.TokenHash,
+		t.UserAgent,
+		t.IPAddress,
+		t.ExpiresAt,
+	)
+	if err != nil {
+		return fmt.Errorf("create token: %w", err)
+	}
+	return nil
 }
 
 func (r *Postgres) RevokeToken(ctx context.Context, tokenHash string) error {
 	_, err := r.DB.ExecContext(ctx, revokeRefreshTokenQuery, tokenHash)
-	return err
+	if err != nil {
+		return fmt.Errorf("revoke token: %w", err)
+	}
+	return nil
 }
 
 func (r *Postgres) GetToken(ctx context.Context, tokenHash string) (*domain.RefreshToken, error) {
@@ -27,7 +43,7 @@ func (r *Postgres) GetToken(ctx context.Context, tokenHash string) (*domain.Refr
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrTokenNotFound
 		}
-		return nil, err
+		return nil, fmt.Errorf("get token: %w", err)
 	}
 
 	return &t, nil
@@ -35,5 +51,8 @@ func (r *Postgres) GetToken(ctx context.Context, tokenHash string) (*domain.Refr
 
 func (r *Postgres) RevokeAllTokens(ctx context.Context, userID uuid.UUID) error {
 	_, err := r.DB.ExecContext(ctx, revokeAllTokensQuery, userID)
-	return err
+	if err != nil {
+		return fmt.Errorf("revoke all tokens: %w", err)
+	}
+	return nil
 }

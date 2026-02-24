@@ -7,8 +7,9 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/kuromii5/chat-bot-auth-service/pkg/validator"
 	"github.com/sirupsen/logrus"
+
+	"github.com/kuromii5/chat-bot-auth-service/pkg/validator"
 )
 
 type errorMapping struct {
@@ -23,6 +24,7 @@ func WrapError(w http.ResponseWriter, r *http.Request, err error) {
 	requestID := middleware.GetReqID(r.Context())
 
 	logrus.WithFields(logrus.Fields{
+		"service":    "auth-service",
 		"request_id": requestID,
 		"status":     mapping.status,
 		"error":      err.Error(),
@@ -38,15 +40,16 @@ func WrapError(w http.ResponseWriter, r *http.Request, err error) {
 	JSON(w, mapping.status, response)
 }
 
-func JSON(w http.ResponseWriter, status int, payload any) error {
+func JSON(w http.ResponseWriter, status int, payload any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	return json.NewEncoder(w).Encode(payload)
+	if err := json.NewEncoder(w).Encode(payload); err != nil {
+		logrus.WithError(err).Error("json encode failed")
+	}
 }
 
-func NoContent(w http.ResponseWriter) error {
+func NoContent(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
-	return nil
 }
 
 func getErrorMapping(err error) errorMapping {

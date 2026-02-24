@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+
 	"github.com/kuromii5/chat-bot-auth-service/internal/domain"
 )
 
