@@ -27,8 +27,8 @@ linters:
     - forcetypeassert
     - errorlint
     - wrapcheck
-    - copyloopvar   # catch loop variable capture bugs (Go 1.22+)
-    - nilerr        # catch return nil when err != nil
+    - copyloopvar
+    - nilerr
   exclusions:
     generated: strict
     warn-unused: true
