@@ -7,7 +7,7 @@ import (
 	"github.com/kuromii5/chat-bot-auth-service/internal/domain"
 )
 
-func (r *Postgres) CreateUser(ctx context.Context, user *domain.User) (*domain.User, error) {
+func (r *postgres) CreateUser(ctx context.Context, user *domain.User) (*domain.User, error) {
 	tx, err := r.DB.BeginTxx(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
@@ -38,7 +38,7 @@ func (r *Postgres) CreateUser(ctx context.Context, user *domain.User) (*domain.U
 	return user, nil
 }
 
-func (r *Postgres) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {
+func (r *postgres) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {
 	var user domain.User
 	err := r.DB.GetContext(ctx, &user, getUserByEmailQuery, email)
 	if err != nil {
@@ -48,7 +48,7 @@ func (r *Postgres) GetUserByEmail(ctx context.Context, email string) (*domain.Us
 	return &user, nil
 }
 
-func (r *Postgres) GetUserByUsername(ctx context.Context, username string) (*domain.User, error) {
+func (r *postgres) GetUserByUsername(ctx context.Context, username string) (*domain.User, error) {
 	var user domain.User
 	err := r.DB.GetContext(ctx, &user, getUserByUsernameQuery, username)
 	if err != nil {

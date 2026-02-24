@@ -11,7 +11,7 @@ import (
 	"github.com/kuromii5/chat-bot-auth-service/internal/domain"
 )
 
-func (r *Postgres) CreateToken(ctx context.Context, t *domain.RefreshToken) error {
+func (r *postgres) CreateToken(ctx context.Context, t *domain.RefreshToken) error {
 	_, err := r.DB.ExecContext(
 		ctx,
 		createRefreshTokenQuery,
@@ -27,7 +27,7 @@ func (r *Postgres) CreateToken(ctx context.Context, t *domain.RefreshToken) erro
 	return nil
 }
 
-func (r *Postgres) RevokeToken(ctx context.Context, tokenHash string) error {
+func (r *postgres) RevokeToken(ctx context.Context, tokenHash string) error {
 	_, err := r.DB.ExecContext(ctx, revokeRefreshTokenQuery, tokenHash)
 	if err != nil {
 		return fmt.Errorf("revoke token: %w", err)
@@ -35,7 +35,7 @@ func (r *Postgres) RevokeToken(ctx context.Context, tokenHash string) error {
 	return nil
 }
 
-func (r *Postgres) GetToken(ctx context.Context, tokenHash string) (*domain.RefreshToken, error) {
+func (r *postgres) GetToken(ctx context.Context, tokenHash string) (*domain.RefreshToken, error) {
 	var t domain.RefreshToken
 
 	err := r.DB.GetContext(ctx, &t, getRefreshTokenQuery, tokenHash)
@@ -49,7 +49,7 @@ func (r *Postgres) GetToken(ctx context.Context, tokenHash string) (*domain.Refr
 	return &t, nil
 }
 
-func (r *Postgres) RevokeAllTokens(ctx context.Context, userID uuid.UUID) error {
+func (r *postgres) RevokeAllTokens(ctx context.Context, userID uuid.UUID) error {
 	_, err := r.DB.ExecContext(ctx, revokeAllTokensQuery, userID)
 	if err != nil {
 		return fmt.Errorf("revoke all tokens: %w", err)

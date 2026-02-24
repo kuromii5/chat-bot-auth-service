@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/kuromii5/chat-bot-auth-service/internal/service"
+	"github.com/kuromii5/chat-bot-auth-service/pkg/validator"
 	"github.com/kuromii5/chat-bot-auth-service/pkg/wrapper"
 )
 
@@ -26,6 +27,10 @@ type logoutRequest struct {
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var req loginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		wrapper.WrapError(w, r, err)
+		return
+	}
+	if err := validator.Validate(req); err != nil {
 		wrapper.WrapError(w, r, err)
 		return
 	}
@@ -56,6 +61,10 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	var req logoutRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		wrapper.WrapError(w, r, err)
+		return
+	}
+	if err := validator.Validate(req); err != nil {
 		wrapper.WrapError(w, r, err)
 		return
 	}

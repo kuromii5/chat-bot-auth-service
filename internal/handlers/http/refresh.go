@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/kuromii5/chat-bot-auth-service/internal/service"
+	"github.com/kuromii5/chat-bot-auth-service/pkg/validator"
 	"github.com/kuromii5/chat-bot-auth-service/pkg/wrapper"
 )
 
@@ -21,6 +22,10 @@ type refreshResponse struct {
 func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
 	var req refreshRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		wrapper.WrapError(w, r, err)
+		return
+	}
+	if err := validator.Validate(req); err != nil {
 		wrapper.WrapError(w, r, err)
 		return
 	}

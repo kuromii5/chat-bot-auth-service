@@ -16,11 +16,11 @@ import (
 
 const UniqueViolationErrorCode = "23505"
 
-type Postgres struct {
+type postgres struct {
 	DB *sqlx.DB
 }
 
-func New(cfg *config.DatabaseConfig) (*Postgres, error) {
+func New(cfg *config.DatabaseConfig) (*postgres, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -33,7 +33,7 @@ func New(cfg *config.DatabaseConfig) (*Postgres, error) {
 		return nil, fmt.Errorf("ping: %w", err)
 	}
 
-	return &Postgres{DB: db}, nil
+	return &postgres{DB: db}, nil
 }
 
 func DSN(c *config.DatabaseConfig) string {
@@ -43,7 +43,7 @@ func DSN(c *config.DatabaseConfig) string {
 	)
 }
 
-func (r *Postgres) handleError(err error, field string) error {
+func (r *postgres) handleError(err error, field string) error {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {
 		if pgErr.Code == UniqueViolationErrorCode {
