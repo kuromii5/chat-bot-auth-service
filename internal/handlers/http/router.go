@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/riandyrn/otelchi"
 )
 
 type UserHandler interface {
@@ -22,6 +23,7 @@ func NewRouter(userH UserHandler, authH AuthHandler) http.Handler {
 	r := chi.NewRouter()
 	r.Use(
 		middleware.RequestID,
+		otelchi.Middleware("auth-service", otelchi.WithChiRoutes(r)),
 		middleware.RealIP,
 		middleware.Logger,
 		middleware.Recoverer,

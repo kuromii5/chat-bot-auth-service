@@ -17,6 +17,7 @@ import (
 	"github.com/kuromii5/chat-bot-auth-service/internal/service/session"
 	userservice "github.com/kuromii5/chat-bot-auth-service/internal/service/user"
 	"github.com/kuromii5/chat-bot-auth-service/pkg/jwt"
+	"github.com/kuromii5/chat-bot-auth-service/pkg/tracing"
 	"github.com/kuromii5/chat-bot-auth-service/pkg/validator"
 )
 
@@ -27,6 +28,21 @@ func main() {
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
+
+	shutdownTracer, err := tracing.InitTracer(
+		context.Background(),
+		"auth-service",
+		cfg.Tracing.Endpoint,
+		cfg.Tracing.Sampler,
+	)
+	if err != nil {
+		logrus.WithError(err).Fatal("Failed to init OpenTelemetry")
+	}
+	defer func() {
+		if err := shutdownTracer(context.Background()); err != nil {
+			logrus.WithError(err).Error("Failed to shutdown tracer")
+		}
+	}()
 
 	pg, err := postgres.New(&cfg.Database)
 	if err != nil {
@@ -92,4 +108,5 @@ func setupLogger(level string) {
 	logrus.SetFormatter(&logrus.TextFormatter{
 		DisableTimestamp: true,
 	})
+	logrus.AddHook(&tracing.OTelHook{})
 }
