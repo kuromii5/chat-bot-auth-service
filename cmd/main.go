@@ -11,10 +11,12 @@ import (
 
 	"github.com/kuromii5/chat-bot-auth-service/config"
 	"github.com/kuromii5/chat-bot-auth-service/internal/adapters/postgres"
+	tracingadapter "github.com/kuromii5/chat-bot-auth-service/internal/adapters/tracing"
 	httpserver "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http"
 	authhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/auth"
 	userhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/user"
 	"github.com/kuromii5/chat-bot-auth-service/internal/service/session"
+	tracingsvc "github.com/kuromii5/chat-bot-auth-service/internal/service/tracing"
 	userservice "github.com/kuromii5/chat-bot-auth-service/internal/service/user"
 	"github.com/kuromii5/chat-bot-auth-service/pkg/jwt"
 	"github.com/kuromii5/chat-bot-auth-service/pkg/tracing"
@@ -55,12 +57,14 @@ func main() {
 		cfg.JWT.RefreshTokenExpiry,
 	)
 
-	userSvc := userservice.NewService(pg)
-	sessionSvc := session.NewService(pg, pg, jwtManager)
+	tracingPG := tracingadapter.NewRepo(pg)
+
+	userSvc := userservice.NewService(tracingPG)
+	sessionSvc := session.NewService(tracingPG, tracingPG, jwtManager)
 
 	router := httpserver.NewRouter(
-		userhandler.NewHandler(userSvc),
-		authhandler.NewHandler(sessionSvc),
+		userhandler.NewHandler(tracingsvc.NewUserService(userSvc)),
+		authhandler.NewHandler(tracingsvc.NewAuthService(sessionSvc)),
 	)
 
 	httpserver.InitMetrics(cfg.Metrics.Port)
