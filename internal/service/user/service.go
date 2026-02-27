@@ -1,5 +1,7 @@
 package user
 
+//go:generate mockery
+
 import (
 	"context"
 

@@ -1,5 +1,7 @@
 package session
 
+//go:generate mockery
+
 import (
 	"context"
 	"time"
