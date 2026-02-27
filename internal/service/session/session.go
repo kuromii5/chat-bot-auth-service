@@ -88,7 +88,7 @@ func (s *Service) Refresh(ctx context.Context, req RefreshRequest) (*RefreshResp
 		return nil, domain.ErrTokenNotFound
 	}
 
-	if tokenDoc.IsRevoked {
+	if tokenDoc.RevokedAt != nil {
 		return nil, domain.ErrTokenRevoked
 	}
 

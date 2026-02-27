@@ -13,7 +13,6 @@ type RefreshToken struct {
 	Role      Role       `db:"role"`
 	UserAgent *string    `db:"user_agent"`
 	IPAddress *string    `db:"ip_address"`
-	IsRevoked bool       `db:"is_revoked"`
 	ExpiresAt time.Time  `db:"expires_at"`
 	CreatedAt time.Time  `db:"created_at"`
 	RevokedAt *time.Time `db:"revoked_at"`

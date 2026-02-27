@@ -8,9 +8,9 @@ const (
 	`
 
 	revokeRefreshTokenQuery = `
-		UPDATE auth.refresh_tokens 
-		SET is_revoked = true, revoked_at = NOW() 
-		WHERE token_hash = $1 AND is_revoked = false
+		UPDATE auth.refresh_tokens
+		SET revoked_at = NOW()
+		WHERE token_hash = $1 AND revoked_at IS NULL
 	`
 
 	getRefreshTokenQuery = `
@@ -20,7 +20,6 @@ const (
 			, rt.token_hash
 			, rt.user_agent
 			, rt.ip_address
-			, rt.is_revoked
 			, rt.expires_at
 			, rt.created_at
 			, rt.revoked_at
@@ -32,8 +31,8 @@ const (
 
 	revokeAllTokensQuery = `
         UPDATE auth.refresh_tokens
-        SET is_revoked = true, revoked_at = NOW()
-        WHERE user_id = $1 AND is_revoked = false
+        SET revoked_at = NOW()
+        WHERE user_id = $1 AND revoked_at IS NULL
     `
 )
 
