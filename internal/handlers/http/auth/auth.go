@@ -44,7 +44,8 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ip := r.Header.Get("X-Forwarded-For")
+	ip := strings.SplitN(r.Header.Get("X-Forwarded-For"), ",", 2)[0]
+	ip = strings.TrimSpace(ip)
 	if ip == "" {
 		ip = strings.Split(r.RemoteAddr, ":")[0]
 	}
@@ -96,7 +97,8 @@ func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ip := r.Header.Get("X-Forwarded-For")
+	ip := strings.SplitN(r.Header.Get("X-Forwarded-For"), ",", 2)[0]
+	ip = strings.TrimSpace(ip)
 	if ip == "" {
 		ip = strings.Split(r.RemoteAddr, ":")[0]
 	}
