@@ -44,9 +44,8 @@ func DSN(c *config.DatabaseConfig) string {
 }
 
 func (r *postgres) handleError(err error, field string) error {
-	var pgErr *pgconn.PgError
-	if errors.As(err, &pgErr) {
-		if pgErr.Code == UniqueViolationErrorCode {
+	if pgerr, ok := errors.AsType[*pgconn.PgError](err); ok {
+		if pgerr.Code == UniqueViolationErrorCode {
 			return fmt.Errorf(
 				"failed to create user: %w (field: %s)",
 				domain.ErrUserAlreadyExists,
