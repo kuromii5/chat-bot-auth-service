@@ -7,6 +7,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/riandyrn/otelchi"
+
+	"github.com/kuromii5/chat-bot-auth-service/pkg/wrapper"
 )
 
 type UserHandler interface {
@@ -25,7 +27,7 @@ func NewRouter(userH UserHandler, authH AuthHandler) http.Handler {
 		middleware.RequestID,
 		otelchi.Middleware("auth-service", otelchi.WithChiRoutes(r)),
 		middleware.RealIP,
-		middleware.Logger,
+		wrapper.AccessLog,
 		middleware.Recoverer,
 		middleware.Timeout(30*time.Second),
 	)

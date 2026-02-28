@@ -17,11 +17,12 @@ func NewServer(host, port string, router http.Handler) *Server {
 
 	return &Server{
 		httpServer: &http.Server{
-			Addr:         addr,
-			Handler:      router,
-			ReadTimeout:  15 * time.Second,
-			WriteTimeout: 15 * time.Second,
-			IdleTimeout:  60 * time.Second,
+			Addr:              addr,
+			Handler:           router,
+			ReadHeaderTimeout: 5 * time.Second,
+			ReadTimeout:       15 * time.Second,
+			WriteTimeout:      15 * time.Second,
+			IdleTimeout:       60 * time.Second,
 		},
 		router: router,
 	}

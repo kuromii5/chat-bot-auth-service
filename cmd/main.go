@@ -67,7 +67,7 @@ func main() {
 		authhandler.NewHandler(tracingsvc.NewAuthService(sessionSvc)),
 	)
 
-	httpserver.InitMetrics(cfg.Metrics.Port)
+	httpserver.InitMetrics(ctx, cfg.Metrics.Port)
 	server := httpserver.NewServer(cfg.Server.Host, cfg.Server.Port, router)
 
 	errChan := make(chan error, 1)
