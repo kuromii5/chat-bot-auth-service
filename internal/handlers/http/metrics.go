@@ -30,10 +30,10 @@ func InitMetrics(ctx context.Context, port string) {
 
 	go func() {
 		<-ctx.Done()
-		shudownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		if err := server.Shutdown(shudownCtx); err != nil {
-			logrus.WithError(err).Error("metrict server shutdown failed")
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			logrus.WithError(err).Error("metrics server shutdown failed")
 		}
 	}()
 }
