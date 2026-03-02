@@ -15,3 +15,9 @@ packages:
       UserRepo:
       TokenRepo:
       JWTManager:
+  github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/user:
+    interfaces:
+      Service:
+  github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/auth:
+    interfaces:
+      Service:
