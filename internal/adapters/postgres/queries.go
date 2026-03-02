@@ -55,10 +55,4 @@ const (
 		FROM auth.users
 		WHERE email = $1
 	`
-
-	getUserByUsernameQuery = `
-		SELECT id, email, password_hash, token_version, created_at, updated_at, role
-		FROM auth.users
-		WHERE username = $1
-	`
 )
