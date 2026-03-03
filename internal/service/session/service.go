@@ -22,7 +22,7 @@ type TokenRepo interface {
 }
 
 type JWTManager interface {
-	GenerateAccess(userID uuid.UUID, role domain.Role) (string, error)
+	GenerateAccess(userID uuid.UUID, role string) (string, error)
 	RefreshTokenExpiry() time.Duration
 }
 

@@ -12,21 +12,24 @@ import (
 	"github.com/kuromii5/chat-bot-auth-service/config"
 	"github.com/kuromii5/chat-bot-auth-service/internal/adapters/postgres"
 	tracingadapter "github.com/kuromii5/chat-bot-auth-service/internal/adapters/tracing"
+	apperrors "github.com/kuromii5/chat-bot-auth-service/internal/errors"
 	httpserver "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http"
 	authhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/auth"
 	userhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/user"
 	"github.com/kuromii5/chat-bot-auth-service/internal/service/session"
 	tracingsvc "github.com/kuromii5/chat-bot-auth-service/internal/service/tracing"
 	userservice "github.com/kuromii5/chat-bot-auth-service/internal/service/user"
-	"github.com/kuromii5/chat-bot-auth-service/pkg/jwt"
-	"github.com/kuromii5/chat-bot-auth-service/pkg/tracing"
-	"github.com/kuromii5/chat-bot-auth-service/pkg/validator"
+	"github.com/kuromii5/chat-bot-shared/jwt"
+	"github.com/kuromii5/chat-bot-shared/tracing"
+	"github.com/kuromii5/chat-bot-shared/validator"
+	"github.com/kuromii5/chat-bot-shared/wrapper"
 )
 
 func main() {
 	cfg := config.MustLoad()
 	setupLogger(cfg.Log.Level)
 	validator.Init()
+	wrapper.RegisterErrors(apperrors.Registry)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()

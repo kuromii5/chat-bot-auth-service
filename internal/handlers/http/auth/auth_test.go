@@ -13,13 +13,16 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/kuromii5/chat-bot-auth-service/internal/domain"
+	apperrors "github.com/kuromii5/chat-bot-auth-service/internal/errors"
 	"github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/auth/mocks"
 	"github.com/kuromii5/chat-bot-auth-service/internal/service/session"
-	"github.com/kuromii5/chat-bot-auth-service/pkg/validator"
+	"github.com/kuromii5/chat-bot-shared/validator"
+	"github.com/kuromii5/chat-bot-shared/wrapper"
 )
 
 func TestMain(m *testing.M) {
 	validator.Init()
+	wrapper.RegisterErrors(apperrors.Registry)
 	os.Exit(m.Run())
 }
 

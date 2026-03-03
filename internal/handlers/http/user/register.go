@@ -6,8 +6,8 @@ import (
 
 	"github.com/kuromii5/chat-bot-auth-service/internal/domain"
 	userservice "github.com/kuromii5/chat-bot-auth-service/internal/service/user"
-	"github.com/kuromii5/chat-bot-auth-service/pkg/validator"
-	"github.com/kuromii5/chat-bot-auth-service/pkg/wrapper"
+	"github.com/kuromii5/chat-bot-shared/validator"
+	"github.com/kuromii5/chat-bot-shared/wrapper"
 )
 
 type registerRequest struct {

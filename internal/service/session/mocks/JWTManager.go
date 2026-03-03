@@ -3,7 +3,6 @@
 package mocks
 
 import (
-	domain "github.com/kuromii5/chat-bot-auth-service/internal/domain"
 	mock "github.com/stretchr/testify/mock"
 
 	time "time"
@@ -25,7 +24,7 @@ func (_m *MockJWTManager) EXPECT() *MockJWTManager_Expecter {
 }
 
 // GenerateAccess provides a mock function with given fields: userID, role
-func (_m *MockJWTManager) GenerateAccess(userID uuid.UUID, role domain.Role) (string, error) {
+func (_m *MockJWTManager) GenerateAccess(userID uuid.UUID, role string) (string, error) {
 	ret := _m.Called(userID, role)
 
 	if len(ret) == 0 {
@@ -34,16 +33,16 @@ func (_m *MockJWTManager) GenerateAccess(userID uuid.UUID, role domain.Role) (st
 
 	var r0 string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(uuid.UUID, domain.Role) (string, error)); ok {
+	if rf, ok := ret.Get(0).(func(uuid.UUID, string) (string, error)); ok {
 		return rf(userID, role)
 	}
-	if rf, ok := ret.Get(0).(func(uuid.UUID, domain.Role) string); ok {
+	if rf, ok := ret.Get(0).(func(uuid.UUID, string) string); ok {
 		r0 = rf(userID, role)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
-	if rf, ok := ret.Get(1).(func(uuid.UUID, domain.Role) error); ok {
+	if rf, ok := ret.Get(1).(func(uuid.UUID, string) error); ok {
 		r1 = rf(userID, role)
 	} else {
 		r1 = ret.Error(1)
@@ -59,14 +58,14 @@ type MockJWTManager_GenerateAccess_Call struct {
 
 // GenerateAccess is a helper method to define mock.On call
 //   - userID uuid.UUID
-//   - role domain.Role
+//   - role string
 func (_e *MockJWTManager_Expecter) GenerateAccess(userID interface{}, role interface{}) *MockJWTManager_GenerateAccess_Call {
 	return &MockJWTManager_GenerateAccess_Call{Call: _e.mock.On("GenerateAccess", userID, role)}
 }
 
-func (_c *MockJWTManager_GenerateAccess_Call) Run(run func(userID uuid.UUID, role domain.Role)) *MockJWTManager_GenerateAccess_Call {
+func (_c *MockJWTManager_GenerateAccess_Call) Run(run func(userID uuid.UUID, role string)) *MockJWTManager_GenerateAccess_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(uuid.UUID), args[1].(domain.Role))
+		run(args[0].(uuid.UUID), args[1].(string))
 	})
 	return _c
 }
@@ -76,7 +75,7 @@ func (_c *MockJWTManager_GenerateAccess_Call) Return(_a0 string, _a1 error) *Moc
 	return _c
 }
 
-func (_c *MockJWTManager_GenerateAccess_Call) RunAndReturn(run func(uuid.UUID, domain.Role) (string, error)) *MockJWTManager_GenerateAccess_Call {
+func (_c *MockJWTManager_GenerateAccess_Call) RunAndReturn(run func(uuid.UUID, string) (string, error)) *MockJWTManager_GenerateAccess_Call {
 	_c.Call.Return(run)
 	return _c
 }

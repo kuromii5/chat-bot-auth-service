@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/riandyrn/otelchi"
 
-	"github.com/kuromii5/chat-bot-auth-service/pkg/wrapper"
+	"github.com/kuromii5/chat-bot-shared/wrapper"
 )
 
 type UserHandler interface {

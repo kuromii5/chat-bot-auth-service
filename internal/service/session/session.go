@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/kuromii5/chat-bot-auth-service/internal/domain"
-	"github.com/kuromii5/chat-bot-auth-service/pkg/jwt"
+	"github.com/kuromii5/chat-bot-shared/jwt"
 )
 
 type LoginRequest struct {
@@ -48,7 +48,7 @@ func (s *Service) Login(ctx context.Context, req LoginRequest) (*LoginResponse, 
 		return nil, domain.ErrInvalidCredentials
 	}
 
-	accessToken, err := s.jwtManager.GenerateAccess(user.ID, user.Role)
+	accessToken, err := s.jwtManager.GenerateAccess(user.ID, string(user.Role))
 	if err != nil {
 		return nil, fmt.Errorf("generate access token: %w", err)
 	}
@@ -96,7 +96,7 @@ func (s *Service) Refresh(ctx context.Context, req RefreshRequest) (*RefreshResp
 		return nil, domain.ErrTokenExpired
 	}
 
-	newAccessToken, err := s.jwtManager.GenerateAccess(tokenDoc.UserID, tokenDoc.Role)
+	newAccessToken, err := s.jwtManager.GenerateAccess(tokenDoc.UserID, string(tokenDoc.Role))
 	if err != nil {
 		return nil, fmt.Errorf("generate access token: %w", err)
 	}
