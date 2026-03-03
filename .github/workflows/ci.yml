@@ -3,9 +3,25 @@ name: Auth Service CI
 on:
   push:
     branches: ["main", "dev"]
-    tags: [ 'v[0-9]*.[0-9]*' ]
+    tags: ['v[0-9]*.[0-9]*']
+  pull_request:
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.26"
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v7
+        with:
+          version: latest
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -14,10 +30,13 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: 1.26
+          go-version: "1.26"
 
       - name: Run tests
         run: go test ./...
+
+      - name: Build
+        run: go build ./cmd/...
 
   integration-test:
     runs-on: ubuntu-latest
@@ -30,13 +49,13 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: 1.26
+          go-version: "1.26"
 
       - name: Run integration tests
         run: go test ./tests/integration/ -tags=integration -v -count=1
 
   build-and-push:
-    needs: test
+    needs: [lint, test, integration-test]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
