@@ -11,7 +11,10 @@ import (
 )
 
 type userInner interface {
-	Register(ctx context.Context, req userservice.RegisterRequest) (*userservice.RegisterResponse, error)
+	Register(
+		ctx context.Context,
+		req userservice.RegisterRequest,
+	) (*userservice.RegisterResponse, error)
 }
 
 // UserService wraps the user service and adds an OTel span around Register.
@@ -24,7 +27,10 @@ func NewUserService(inner userInner) *UserService {
 	return &UserService{inner: inner}
 }
 
-func (s *UserService) Register(ctx context.Context, req userservice.RegisterRequest) (*userservice.RegisterResponse, error) {
+func (s *UserService) Register(
+	ctx context.Context,
+	req userservice.RegisterRequest,
+) (*userservice.RegisterResponse, error) {
 	ctx, span := otel.Tracer("service/user").Start(ctx, "user.Register")
 	defer span.End()
 	span.SetAttributes(

@@ -130,7 +130,11 @@ func TestRegister(t *testing.T) {
 			}
 			h := NewHandler(svc)
 
-			req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/register", strings.NewReader(tt.body))
+			req := httptest.NewRequest(
+				http.MethodPost,
+				"/api/v1/auth/register",
+				strings.NewReader(tt.body),
+			)
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 

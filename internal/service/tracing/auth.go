@@ -26,7 +26,10 @@ func NewAuthService(inner authInner) *AuthService {
 	return &AuthService{inner: inner}
 }
 
-func (s *AuthService) Login(ctx context.Context, req session.LoginRequest) (*session.LoginResponse, error) {
+func (s *AuthService) Login(
+	ctx context.Context,
+	req session.LoginRequest,
+) (*session.LoginResponse, error) {
 	ctx, span := otel.Tracer("service/session").Start(ctx, "session.Login")
 	defer span.End()
 	span.SetAttributes(attribute.String("user.email", req.Email))
@@ -51,7 +54,10 @@ func (s *AuthService) Logout(ctx context.Context, refreshToken string) error {
 	return err
 }
 
-func (s *AuthService) Refresh(ctx context.Context, req session.RefreshRequest) (*session.RefreshResponse, error) {
+func (s *AuthService) Refresh(
+	ctx context.Context,
+	req session.RefreshRequest,
+) (*session.RefreshResponse, error) {
 	ctx, span := otel.Tracer("service/session").Start(ctx, "session.Refresh")
 	defer span.End()
 

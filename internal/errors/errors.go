@@ -8,7 +8,10 @@ import (
 )
 
 var Registry = map[error]wrapper.ErrorResponse{
-	domain.ErrUserAlreadyExists:  {Status: http.StatusConflict, Message: "User with this email or username already exists"},
+	domain.ErrUserAlreadyExists: {
+		Status:  http.StatusConflict,
+		Message: "User with this email or username already exists",
+	},
 	domain.ErrInvalidCredentials: {Status: http.StatusUnauthorized, Message: "Invalid credentials"},
 	domain.ErrTokenNotFound:      {Status: http.StatusNotFound, Message: "Token not found"},
 	domain.ErrTokenExpired:       {Status: http.StatusUnauthorized, Message: "Token expired"},

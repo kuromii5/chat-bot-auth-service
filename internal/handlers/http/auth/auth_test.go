@@ -95,12 +95,14 @@ func TestLogin(t *testing.T) {
 			body:    `{"email":"alice@example.com","password":"secret123"}`,
 			headers: map[string]string{"X-Forwarded-For": "203.0.113.50, 70.41.3.18"},
 			setup: func(svc *mocks.MockService) {
-				svc.EXPECT().Login(mock.Anything, mock.MatchedBy(func(req session.LoginRequest) bool {
-					return req.IPAddress == "203.0.113.50"
-				})).Return(&session.LoginResponse{
-					AccessToken:  "access.token",
-					RefreshToken: "refresh.token",
-				}, nil)
+				svc.EXPECT().
+					Login(mock.Anything, mock.MatchedBy(func(req session.LoginRequest) bool {
+						return req.IPAddress == "203.0.113.50"
+					})).
+					Return(&session.LoginResponse{
+						AccessToken:  "access.token",
+						RefreshToken: "refresh.token",
+					}, nil)
 			},
 			wantStatus: http.StatusOK,
 			wantKey:    "access_token",
@@ -116,7 +118,11 @@ func TestLogin(t *testing.T) {
 			}
 			h := NewHandler(svc)
 
-			req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", strings.NewReader(tt.body))
+			req := httptest.NewRequest(
+				http.MethodPost,
+				"/api/v1/auth/login",
+				strings.NewReader(tt.body),
+			)
 			req.Header.Set("Content-Type", "application/json")
 			for k, v := range tt.headers {
 				req.Header.Set(k, v)
@@ -193,7 +199,11 @@ func TestLogout(t *testing.T) {
 			}
 			h := NewHandler(svc)
 
-			req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/logout", strings.NewReader(tt.body))
+			req := httptest.NewRequest(
+				http.MethodPost,
+				"/api/v1/auth/logout",
+				strings.NewReader(tt.body),
+			)
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 
@@ -295,7 +305,11 @@ func TestRefresh(t *testing.T) {
 			}
 			h := NewHandler(svc)
 
-			req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/refresh", strings.NewReader(tt.body))
+			req := httptest.NewRequest(
+				http.MethodPost,
+				"/api/v1/auth/refresh",
+				strings.NewReader(tt.body),
+			)
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 

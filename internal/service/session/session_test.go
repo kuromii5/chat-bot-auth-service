@@ -59,7 +59,9 @@ func TestLogin(t *testing.T) {
 						PasswordHash: testPasswordHash,
 						Role:         domain.Human,
 					}, nil)
-				jm.EXPECT().GenerateAccess(testUserID, string(domain.Human)).Return("access.token.here", nil)
+				jm.EXPECT().
+					GenerateAccess(testUserID, string(domain.Human)).
+					Return("access.token.here", nil)
 				jm.EXPECT().RefreshTokenExpiry().Return(24 * time.Hour)
 				tr.EXPECT().CreateToken(mock.Anything, mock.Anything).Return(nil)
 			},
@@ -98,7 +100,9 @@ func TestLogin(t *testing.T) {
 						PasswordHash: testPasswordHash,
 						Role:         domain.Human,
 					}, nil)
-				jm.EXPECT().GenerateAccess(testUserID, string(domain.Human)).Return("", errors.New("signing error"))
+				jm.EXPECT().
+					GenerateAccess(testUserID, string(domain.Human)).
+					Return("", errors.New("signing error"))
 			},
 			wantErr: true,
 		},
@@ -112,9 +116,13 @@ func TestLogin(t *testing.T) {
 						PasswordHash: testPasswordHash,
 						Role:         domain.Human,
 					}, nil)
-				jm.EXPECT().GenerateAccess(testUserID, string(domain.Human)).Return("access.token.here", nil)
+				jm.EXPECT().
+					GenerateAccess(testUserID, string(domain.Human)).
+					Return("access.token.here", nil)
 				jm.EXPECT().RefreshTokenExpiry().Return(24 * time.Hour)
-				tr.EXPECT().CreateToken(mock.Anything, mock.Anything).Return(errors.New("db unavailable"))
+				tr.EXPECT().
+					CreateToken(mock.Anything, mock.Anything).
+					Return(errors.New("db unavailable"))
 			},
 			wantErr: true,
 		},
@@ -230,10 +238,16 @@ func TestRefresh(t *testing.T) {
 	}{
 		{
 			name: "success",
-			req:  RefreshRequest{OldRefreshTokenRaw: rawToken, UserAgent: "Mozilla/5.0", IPAddress: "127.0.0.1"},
+			req: RefreshRequest{
+				OldRefreshTokenRaw: rawToken,
+				UserAgent:          "Mozilla/5.0",
+				IPAddress:          "127.0.0.1",
+			},
 			setup: func(ur *mocks.MockUserRepo, tr *mocks.MockTokenRepo, jm *mocks.MockJWTManager) {
 				tr.EXPECT().GetToken(mock.Anything, oldHash).Return(validToken, nil)
-				jm.EXPECT().GenerateAccess(testUserID, string(domain.Human)).Return("new.access.token", nil)
+				jm.EXPECT().
+					GenerateAccess(testUserID, string(domain.Human)).
+					Return("new.access.token", nil)
 				tr.EXPECT().RevokeToken(mock.Anything, oldHash).Return(nil)
 				jm.EXPECT().RefreshTokenExpiry().Return(24 * time.Hour)
 				tr.EXPECT().CreateToken(mock.Anything, mock.Anything).Return(nil)
@@ -280,7 +294,9 @@ func TestRefresh(t *testing.T) {
 			req:  RefreshRequest{OldRefreshTokenRaw: rawToken},
 			setup: func(ur *mocks.MockUserRepo, tr *mocks.MockTokenRepo, jm *mocks.MockJWTManager) {
 				tr.EXPECT().GetToken(mock.Anything, oldHash).Return(validToken, nil)
-				jm.EXPECT().GenerateAccess(testUserID, string(domain.Human)).Return("", errors.New("signing error"))
+				jm.EXPECT().
+					GenerateAccess(testUserID, string(domain.Human)).
+					Return("", errors.New("signing error"))
 			},
 			wantErr: true,
 		},
@@ -289,7 +305,9 @@ func TestRefresh(t *testing.T) {
 			req:  RefreshRequest{OldRefreshTokenRaw: rawToken},
 			setup: func(ur *mocks.MockUserRepo, tr *mocks.MockTokenRepo, jm *mocks.MockJWTManager) {
 				tr.EXPECT().GetToken(mock.Anything, oldHash).Return(validToken, nil)
-				jm.EXPECT().GenerateAccess(testUserID, string(domain.Human)).Return("new.access.token", nil)
+				jm.EXPECT().
+					GenerateAccess(testUserID, string(domain.Human)).
+					Return("new.access.token", nil)
 				tr.EXPECT().RevokeToken(mock.Anything, oldHash).Return(errors.New("db error"))
 			},
 			wantErr: true,
@@ -299,7 +317,9 @@ func TestRefresh(t *testing.T) {
 			req:  RefreshRequest{OldRefreshTokenRaw: rawToken},
 			setup: func(ur *mocks.MockUserRepo, tr *mocks.MockTokenRepo, jm *mocks.MockJWTManager) {
 				tr.EXPECT().GetToken(mock.Anything, oldHash).Return(validToken, nil)
-				jm.EXPECT().GenerateAccess(testUserID, string(domain.Human)).Return("new.access.token", nil)
+				jm.EXPECT().
+					GenerateAccess(testUserID, string(domain.Human)).
+					Return("new.access.token", nil)
 				tr.EXPECT().RevokeToken(mock.Anything, oldHash).Return(nil)
 				jm.EXPECT().RefreshTokenExpiry().Return(24 * time.Hour)
 				tr.EXPECT().CreateToken(mock.Anything, mock.Anything).Return(errors.New("db error"))
