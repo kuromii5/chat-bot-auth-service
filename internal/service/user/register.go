@@ -11,10 +11,11 @@ import (
 )
 
 type RegisterRequest struct {
-	Email    string
-	Password string
-	Username string
-	Role     domain.Role
+	Email                     string
+	Password                  string
+	Username                  string
+	Role                      domain.Role
+	EmailNotificationsEnabled bool
 }
 
 type RegisterResponse struct {
@@ -31,10 +32,11 @@ func (s *Service) Register(ctx context.Context, req RegisterRequest) (*RegisterR
 	}
 
 	u, err := s.repo.CreateUser(ctx, &domain.User{
-		Email:        req.Email,
-		PasswordHash: string(hashedPassword),
-		Username:     req.Username,
-		Role:         req.Role,
+		Email:                     req.Email,
+		PasswordHash:              string(hashedPassword),
+		Username:                  req.Username,
+		Role:                      req.Role,
+		EmailNotificationsEnabled: req.EmailNotificationsEnabled,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)

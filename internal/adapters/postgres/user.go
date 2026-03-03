@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
+
 	"github.com/kuromii5/chat-bot-auth-service/internal/domain"
 )
 
@@ -23,6 +25,7 @@ func (r *postgres) CreateUser(ctx context.Context, user *domain.User) (*domain.U
 		user.Email,
 		user.PasswordHash,
 		user.Role,
+		user.EmailNotificationsEnabled,
 	); err != nil {
 		return nil, r.handleError(err, "email")
 	}
@@ -36,6 +39,14 @@ func (r *postgres) CreateUser(ctx context.Context, user *domain.User) (*domain.U
 	}
 
 	return user, nil
+}
+
+func (r *postgres) UpdatePreferences(ctx context.Context, userID uuid.UUID, emailEnabled bool) error {
+	_, err := r.DB.ExecContext(ctx, updatePreferencesQuery, emailEnabled, userID)
+	if err != nil {
+		return fmt.Errorf("failed to update preferences: %w", err)
+	}
+	return nil
 }
 
 func (r *postgres) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {

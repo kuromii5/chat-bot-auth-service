@@ -5,6 +5,7 @@ package mocks
 import (
 	context "context"
 
+	uuid "github.com/google/uuid"
 	mock "github.com/stretchr/testify/mock"
 
 	user "github.com/kuromii5/chat-bot-auth-service/internal/service/user"
@@ -78,6 +79,54 @@ func (_c *MockService_Register_Call) Return(_a0 *user.RegisterResponse, _a1 erro
 }
 
 func (_c *MockService_Register_Call) RunAndReturn(run func(context.Context, user.RegisterRequest) (*user.RegisterResponse, error)) *MockService_Register_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdatePreferences provides a mock function with given fields: ctx, userID, emailEnabled
+func (_m *MockService) UpdatePreferences(ctx context.Context, userID uuid.UUID, emailEnabled bool) error {
+	ret := _m.Called(ctx, userID, emailEnabled)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdatePreferences")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, bool) error); ok {
+		r0 = rf(ctx, userID, emailEnabled)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockService_UpdatePreferences_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdatePreferences'
+type MockService_UpdatePreferences_Call struct {
+	*mock.Call
+}
+
+// UpdatePreferences is a helper method to define mock.On call
+//   - ctx context.Context
+//   - userID uuid.UUID
+//   - emailEnabled bool
+func (_e *MockService_Expecter) UpdatePreferences(ctx interface{}, userID interface{}, emailEnabled interface{}) *MockService_UpdatePreferences_Call {
+	return &MockService_UpdatePreferences_Call{Call: _e.mock.On("UpdatePreferences", ctx, userID, emailEnabled)}
+}
+
+func (_c *MockService_UpdatePreferences_Call) Run(run func(ctx context.Context, userID uuid.UUID, emailEnabled bool)) *MockService_UpdatePreferences_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(uuid.UUID), args[2].(bool))
+	})
+	return _c
+}
+
+func (_c *MockService_UpdatePreferences_Call) Return(_a0 error) *MockService_UpdatePreferences_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockService_UpdatePreferences_Call) RunAndReturn(run func(context.Context, uuid.UUID, bool) error) *MockService_UpdatePreferences_Call {
 	_c.Call.Return(run)
 	return _c
 }
