@@ -3,6 +3,7 @@ package tracing
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
@@ -15,6 +16,7 @@ type userInner interface {
 		ctx context.Context,
 		req userservice.RegisterRequest,
 	) (*userservice.RegisterResponse, error)
+	UpdatePreferences(ctx context.Context, userID uuid.UUID, emailEnabled bool) error
 }
 
 // UserService wraps the user service and adds an OTel span around Register.
@@ -44,4 +46,23 @@ func (s *UserService) Register(
 		span.SetStatus(codes.Error, err.Error())
 	}
 	return result, err
+}
+
+func (s *UserService) UpdatePreferences(
+	ctx context.Context,
+	userID uuid.UUID,
+	emailEnabled bool,
+) error {
+	ctx, span := otel.Tracer("service/user").Start(ctx, "user.UpdatePreferences")
+	defer span.End()
+	span.SetAttributes(
+		attribute.String("user.id", userID.String()),
+	)
+
+	err := s.inner.UpdatePreferences(ctx, userID, emailEnabled)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+	}
+	return err
 }

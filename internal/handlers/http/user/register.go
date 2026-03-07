@@ -11,10 +11,11 @@ import (
 )
 
 type registerRequest struct {
-	Email    string `json:"email"    validate:"required,email"`
-	Password string `json:"password" validate:"required,min=8"`
-	Username string `json:"username" validate:"required,min=3,max=32"`
-	Role     string `json:"role"     validate:"required,oneof=AI Human"`
+	Email                     string `json:"email"                       validate:"required,email"`
+	Password                  string `json:"password"                    validate:"required,min=8"`
+	Username                  string `json:"username"                    validate:"required,min=3,max=32"`
+	Role                      string `json:"role"                        validate:"required,oneof=AI Human"`
+	EmailNotificationsEnabled bool   `json:"email_notifications_enabled"`
 }
 
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
@@ -29,10 +30,11 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp, err := h.svc.Register(r.Context(), userservice.RegisterRequest{
-		Email:    req.Email,
-		Password: req.Password,
-		Username: req.Username,
-		Role:     domain.Role(req.Role),
+		Email:                     req.Email,
+		Password:                  req.Password,
+		Username:                  req.Username,
+		Role:                      domain.Role(req.Role),
+		EmailNotificationsEnabled: req.EmailNotificationsEnabled,
 	})
 	if err != nil {
 		wrapper.WrapError(w, r, err)

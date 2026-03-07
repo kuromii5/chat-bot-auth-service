@@ -20,7 +20,7 @@ jobs:
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
-          version: latest
+          version: v2.10.1
 
   test:
     runs-on: ubuntu-latest
@@ -44,7 +44,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Clone migrations
-        run: git clone https://github.com/kuromii5/chat-bot-migrations.git ../chat-bot-migrations
+        run: git clone https://github.com/kuromii5/chat-bot-migrations.git ../migrations
 
       - name: Set up Go
         uses: actions/setup-go@v6

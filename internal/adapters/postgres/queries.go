@@ -39,9 +39,15 @@ const (
 // user queries
 const (
 	createAuthUserQuery = `
-        INSERT INTO auth.users (email, password_hash, role)
-        VALUES ($1, $2, $3)
+        INSERT INTO auth.users (email, password_hash, role, email_notifications_enabled)
+        VALUES ($1, $2, $3, $4)
         RETURNING id, created_at, token_version, role
+    `
+
+	updatePreferencesQuery = `
+        UPDATE auth.users
+        SET email_notifications_enabled = $1
+        WHERE id = $2
     `
 
 	createProfileQuery = `

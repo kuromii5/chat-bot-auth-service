@@ -3,6 +3,7 @@ package tracing
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
@@ -14,6 +15,7 @@ import (
 // TracingRepo satisfies them all via duck typing — no service package imports needed.
 type postgresRepo interface {
 	CreateUser(ctx context.Context, user *domain.User) (*domain.User, error)
+	UpdatePreferences(ctx context.Context, userID uuid.UUID, emailEnabled bool) error
 	GetUserByEmail(ctx context.Context, email string) (*domain.User, error)
 	CreateToken(ctx context.Context, token *domain.RefreshToken) error
 	GetToken(ctx context.Context, tokenHash string) (*domain.RefreshToken, error)
@@ -48,6 +50,23 @@ func (r *Repo) CreateUser(ctx context.Context, user *domain.User) (*domain.User,
 		span.SetStatus(codes.Error, err.Error())
 	}
 	return result, err
+}
+
+func (r *Repo) UpdatePreferences(ctx context.Context, userID uuid.UUID, emailEnabled bool) error {
+	ctx, span := otel.Tracer(dbTracer).Start(ctx, "postgres.UpdatePreferences")
+	defer span.End()
+	span.SetAttributes(
+		attribute.String("db.operation", "UPDATE"),
+		attribute.String("db.table", "auth.users"),
+		attribute.String("user.id", userID.String()),
+	)
+
+	err := r.inner.UpdatePreferences(ctx, userID, emailEnabled)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+	}
+	return err
 }
 
 func (r *Repo) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {

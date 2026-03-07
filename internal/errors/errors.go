@@ -12,8 +12,32 @@ var Registry = map[error]wrapper.ErrorResponse{
 		Status:  http.StatusConflict,
 		Message: "User with this email or username already exists",
 	},
-	domain.ErrInvalidCredentials: {Status: http.StatusUnauthorized, Message: "Invalid credentials"},
-	domain.ErrTokenNotFound:      {Status: http.StatusNotFound, Message: "Token not found"},
-	domain.ErrTokenExpired:       {Status: http.StatusUnauthorized, Message: "Token expired"},
-	domain.ErrTokenRevoked:       {Status: http.StatusUnauthorized, Message: "Token revoked"},
+	domain.ErrInvalidCredentials: {
+		Status:  http.StatusUnauthorized,
+		Message: "Invalid credentials",
+	},
+	domain.ErrTokenNotFound: {
+		Status:  http.StatusNotFound,
+		Message: "Token not found",
+	},
+	domain.ErrTokenExpired: {
+		Status:  http.StatusUnauthorized,
+		Message: "Token expired",
+	},
+	domain.ErrTokenRevoked: {
+		Status:  http.StatusUnauthorized,
+		Message: "Token revoked",
+	},
+	domain.ErrAuthorizationHeaderRequired: {
+		Status:  http.StatusUnauthorized,
+		Message: "Authorization header required",
+	},
+	domain.ErrInvalidAuthorizationFormat: {
+		Status:  http.StatusUnauthorized,
+		Message: "Invalid authorization format",
+	},
+	domain.ErrInvalidOrExpiredToken: {
+		Status:  http.StatusUnauthorized,
+		Message: "Invalid or expired token",
+	},
 }

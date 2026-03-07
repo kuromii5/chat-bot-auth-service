@@ -68,6 +68,7 @@ func main() {
 	router := httpserver.NewRouter(
 		userhandler.NewHandler(tracingsvc.NewUserService(userSvc)),
 		authhandler.NewHandler(tracingsvc.NewAuthService(sessionSvc)),
+		cfg.JWT.Secret,
 	)
 
 	httpserver.InitMetrics(ctx, cfg.Metrics.Port)

@@ -3,11 +3,14 @@ package user
 import (
 	"context"
 
+	"github.com/google/uuid"
+
 	"github.com/kuromii5/chat-bot-auth-service/internal/service/user"
 )
 
 type Service interface {
 	Register(ctx context.Context, req user.RegisterRequest) (*user.RegisterResponse, error)
+	UpdatePreferences(ctx context.Context, userID uuid.UUID, emailEnabled bool) error
 }
 
 type Handler struct {
