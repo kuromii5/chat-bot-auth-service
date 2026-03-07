@@ -119,9 +119,8 @@ func applyMigrations(_ context.Context, db *sqlx.DB) error {
 		}
 	}
 
-
 	// Apply table DDL from migration files 003, 004, 005
-	migrationsDir := filepath.Join("..", "..", "..", "chat-bot-migrations", "migrations")
+	migrationsDir := filepath.Join("..", "..", "..", "migrations", "migrations")
 	files := []string{
 		"003_create_auth_users_table.sql",
 		"004_create_auth_refresh_tokens_table.sql",

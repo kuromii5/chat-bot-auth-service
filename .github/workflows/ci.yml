@@ -44,7 +44,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Clone migrations
-        run: git clone https://github.com/kuromii5/chat-bot-migrations.git ../chat-bot-migrations
+        run: git clone https://github.com/kuromii5/chat-bot-migrations.git ../migrations
 
       - name: Set up Go
         uses: actions/setup-go@v6
