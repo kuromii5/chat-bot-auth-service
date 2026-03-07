@@ -26,7 +26,11 @@ func (h *Handler) UpdatePreferences(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.svc.UpdatePreferences(r.Context(), userID, req.EmailNotificationsEnabled); err != nil {
+	if err := h.svc.UpdatePreferences(
+		r.Context(),
+		userID,
+		req.EmailNotificationsEnabled,
+	); err != nil {
 		wrapper.WrapError(w, r, err)
 		return
 	}

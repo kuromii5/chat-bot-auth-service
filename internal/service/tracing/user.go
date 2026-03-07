@@ -48,7 +48,11 @@ func (s *UserService) Register(
 	return result, err
 }
 
-func (s *UserService) UpdatePreferences(ctx context.Context, userID uuid.UUID, emailEnabled bool) error {
+func (s *UserService) UpdatePreferences(
+	ctx context.Context,
+	userID uuid.UUID,
+	emailEnabled bool,
+) error {
 	ctx, span := otel.Tracer("service/user").Start(ctx, "user.UpdatePreferences")
 	defer span.End()
 	span.SetAttributes(

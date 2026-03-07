@@ -24,7 +24,11 @@ func NewService(repo UserRepo) *Service {
 	return &Service{repo: repo}
 }
 
-func (s *Service) UpdatePreferences(ctx context.Context, userID uuid.UUID, emailEnabled bool) error {
+func (s *Service) UpdatePreferences(
+	ctx context.Context,
+	userID uuid.UUID,
+	emailEnabled bool,
+) error {
 	if err := s.repo.UpdatePreferences(ctx, userID, emailEnabled); err != nil {
 		return fmt.Errorf("failed to update preferences: %w", err)
 	}

@@ -112,29 +112,35 @@ func startPostgres(ctx context.Context) (testcontainers.Container, string, error
 }
 
 func applyMigrations(_ context.Context, db *sqlx.DB) error {
-	// Create schemas manually (migrations 001, 002 use env var placeholders)
+	// 001 and 002 use env var placeholders — create schemas manually instead
 	for _, schema := range []string{"auth", "core"} {
 		if _, err := db.Exec("CREATE SCHEMA IF NOT EXISTS " + schema); err != nil {
 			return fmt.Errorf("create schema %s: %w", schema, err)
 		}
 	}
 
-	// Apply table DDL from migration files 003, 004, 005
 	migrationsDir := filepath.Join("..", "..", "..", "migrations", "migrations")
-	files := []string{
-		"003_create_auth_users_table.sql",
-		"004_create_auth_refresh_tokens_table.sql",
-		"005_create_core_profiles_table.sql",
+	entries, err := os.ReadDir(migrationsDir)
+	if err != nil {
+		return fmt.Errorf("read migrations dir: %w", err)
 	}
 
-	for _, f := range files {
-		path := filepath.Join(migrationsDir, f)
+	for _, entry := range entries {
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".sql" {
+			continue
+		}
+		// skip 001 and 002 — handled above
+		if entry.Name() < "003" {
+			continue
+		}
+
+		path := filepath.Join(migrationsDir, entry.Name())
 		sql, err := extractUpSQL(path)
 		if err != nil {
-			return fmt.Errorf("extract up sql from %s: %w", f, err)
+			return fmt.Errorf("extract up sql from %s: %w", entry.Name(), err)
 		}
 		if _, err := db.Exec(sql); err != nil {
-			return fmt.Errorf("exec migration %s: %w", f, err)
+			return fmt.Errorf("exec migration %s: %w", entry.Name(), err)
 		}
 	}
 
