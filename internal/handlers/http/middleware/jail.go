@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net"
 	"net/http"
 	"sync"
@@ -121,7 +122,11 @@ func (sr *statusRecorder) Write(b []byte) (int, error) {
 	if sr.status == 0 {
 		sr.status = http.StatusOK
 	}
-	return sr.ResponseWriter.Write(b)
+	n, err := sr.ResponseWriter.Write(b)
+	if err != nil {
+		return n, fmt.Errorf("write response: %w", err)
+	}
+	return n, nil
 }
 
 // clientIP extracts the real client IP from RemoteAddr.

@@ -23,7 +23,12 @@ type AuthHandler interface {
 	Refresh(http.ResponseWriter, *http.Request)
 }
 
-func NewRouter(userH UserHandler, authH AuthHandler, jwtSecret string, jail *authmw.IPJail) http.Handler {
+func NewRouter(
+	userH UserHandler,
+	authH AuthHandler,
+	jwtSecret string,
+	jail *authmw.IPJail,
+) http.Handler {
 	r := chi.NewRouter()
 	r.Use(
 		middleware.RequestID,
