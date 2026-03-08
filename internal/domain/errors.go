@@ -12,4 +12,6 @@ var (
 	ErrAuthorizationHeaderRequired = errors.New("authorization header required")
 	ErrInvalidAuthorizationFormat  = errors.New("invalid authorization format")
 	ErrInvalidOrExpiredToken       = errors.New("invalid or expired token")
+
+	ErrIPJailed = errors.New("ip temporarily banned due to too many failed login attempts")
 )

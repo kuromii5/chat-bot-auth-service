@@ -40,4 +40,8 @@ var Registry = map[error]wrapper.ErrorResponse{
 		Status:  http.StatusUnauthorized,
 		Message: "Invalid or expired token",
 	},
+	domain.ErrIPJailed: {
+		Status:  http.StatusTooManyRequests,
+		Message: "Too many failed login attempts. Try again later",
+	},
 }

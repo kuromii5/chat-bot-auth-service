@@ -10,12 +10,18 @@ import (
 )
 
 type Config struct {
-	Server   ServerConfig
-	Database DatabaseConfig
-	JWT      JWTConfig
-	Log      LogConfig
-	Metrics  MetricsConfig
-	Tracing  TracingConfig
+	Server    ServerConfig
+	Database  DatabaseConfig
+	JWT       JWTConfig
+	Log       LogConfig
+	Metrics   MetricsConfig
+	Tracing   TracingConfig
+	RateLimit RateLimitConfig
+}
+
+type RateLimitConfig struct {
+	MaxFailures int           // failed login attempts before IP is jailed
+	JailMinutes time.Duration // how long the IP stays jailed
 }
 
 type TracingConfig struct {
@@ -53,6 +59,9 @@ type LogConfig struct {
 
 func Load() (*Config, error) {
 	_ = godotenv.Load()
+
+	viper.SetDefault("JAIL_MAX_FAILURES", 5)
+	viper.SetDefault("JAIL_DURATION_MINUTES", 15)
 
 	viper.AutomaticEnv()
 
@@ -93,6 +102,10 @@ func Load() (*Config, error) {
 		Tracing: TracingConfig{
 			Endpoint: viper.GetString("TRACING_ENDPOINT"),
 			Sampler:  viper.GetFloat64("TRACING_SAMPLER"),
+		},
+		RateLimit: RateLimitConfig{
+			MaxFailures: viper.GetInt("JAIL_MAX_FAILURES"),
+			JailMinutes: time.Duration(viper.GetInt("JAIL_DURATION_MINUTES")) * time.Minute,
 		},
 	}
 	return cfg, nil

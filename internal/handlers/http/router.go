@@ -23,7 +23,7 @@ type AuthHandler interface {
 	Refresh(http.ResponseWriter, *http.Request)
 }
 
-func NewRouter(userH UserHandler, authH AuthHandler, jwtSecret string) http.Handler {
+func NewRouter(userH UserHandler, authH AuthHandler, jwtSecret string, jail *authmw.IPJail) http.Handler {
 	r := chi.NewRouter()
 	r.Use(
 		middleware.RequestID,
@@ -36,7 +36,7 @@ func NewRouter(userH UserHandler, authH AuthHandler, jwtSecret string) http.Hand
 
 	r.Route("/api/v1/auth", func(r chi.Router) {
 		r.Post("/register", userH.Register)
-		r.Post("/login", authH.Login)
+		r.With(jail.Middleware).Post("/login", authH.Login)
 		r.Post("/logout", authH.Logout)
 		r.Post("/refresh", authH.Refresh)
 	})

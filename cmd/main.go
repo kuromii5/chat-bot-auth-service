@@ -15,6 +15,7 @@ import (
 	apperrors "github.com/kuromii5/chat-bot-auth-service/internal/errors"
 	httpserver "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http"
 	authhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/auth"
+	authmw "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/middleware"
 	userhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/user"
 	"github.com/kuromii5/chat-bot-auth-service/internal/service/session"
 	tracingsvc "github.com/kuromii5/chat-bot-auth-service/internal/service/tracing"
@@ -65,10 +66,13 @@ func main() {
 	userSvc := userservice.NewService(tracingPG)
 	sessionSvc := session.NewService(tracingPG, tracingPG, jwtManager)
 
+	jail := authmw.NewIPJail(cfg.RateLimit.MaxFailures, cfg.RateLimit.JailMinutes)
+
 	router := httpserver.NewRouter(
 		userhandler.NewHandler(tracingsvc.NewUserService(userSvc)),
 		authhandler.NewHandler(tracingsvc.NewAuthService(sessionSvc)),
 		cfg.JWT.Secret,
+		jail,
 	)
 
 	httpserver.InitMetrics(ctx, cfg.Metrics.Port)
