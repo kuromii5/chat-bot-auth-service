@@ -17,6 +17,7 @@ type postgresRepo interface {
 	CreateUser(ctx context.Context, user *domain.User) (*domain.User, error)
 	UpdatePreferences(ctx context.Context, userID uuid.UUID, emailEnabled bool) error
 	GetUserByEmail(ctx context.Context, email string) (*domain.User, error)
+	GetUserByID(ctx context.Context, id uuid.UUID) (*domain.User, error)
 	CreateToken(ctx context.Context, token *domain.RefreshToken) error
 	GetToken(ctx context.Context, tokenHash string) (*domain.RefreshToken, error)
 	RevokeToken(ctx context.Context, tokenHash string) error
@@ -67,6 +68,23 @@ func (r *Repo) UpdatePreferences(ctx context.Context, userID uuid.UUID, emailEna
 		span.SetStatus(codes.Error, err.Error())
 	}
 	return err
+}
+
+func (r *Repo) GetUserByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
+	ctx, span := otel.Tracer(dbTracer).Start(ctx, "postgres.GetUserByID")
+	defer span.End()
+	span.SetAttributes(
+		attribute.String("db.operation", "SELECT"),
+		attribute.String("db.table", "auth.users"),
+		attribute.String("user.id", id.String()),
+	)
+
+	result, err := r.inner.GetUserByID(ctx, id)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+	}
+	return result, err
 }
 
 func (r *Repo) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {

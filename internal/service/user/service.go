@@ -14,6 +14,7 @@ import (
 type UserRepo interface {
 	CreateUser(ctx context.Context, user *domain.User) (*domain.User, error)
 	UpdatePreferences(ctx context.Context, userID uuid.UUID, emailEnabled bool) error
+	GetUserByID(ctx context.Context, id uuid.UUID) (*domain.User, error)
 }
 
 type Service struct {
@@ -33,4 +34,12 @@ func (s *Service) UpdatePreferences(
 		return fmt.Errorf("failed to update preferences: %w", err)
 	}
 	return nil
+}
+
+func (s *Service) GetPreferences(ctx context.Context, userID uuid.UUID) (*domain.User, error) {
+	user, err := s.repo.GetUserByID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get preferences: %w", err)
+	}
+	return user, nil
 }

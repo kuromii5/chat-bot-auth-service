@@ -34,8 +34,9 @@ type MetricsConfig struct {
 }
 
 type ServerConfig struct {
-	Host string
-	Port string
+	Host     string
+	Port     string
+	GRPCPort string
 }
 
 type DatabaseConfig struct {
@@ -77,8 +78,9 @@ func Load() (*Config, error) {
 
 	cfg := &Config{
 		Server: ServerConfig{
-			Host: viper.GetString("SERVER_HOST"),
-			Port: viper.GetString("SERVER_PORT"),
+			Host:     viper.GetString("SERVER_HOST"),
+			Port:     viper.GetString("SERVER_PORT"),
+			GRPCPort: viper.GetString("GRPC_PORT"),
 		},
 		Database: DatabaseConfig{
 			Host:     viper.GetString("DB_HOST"),

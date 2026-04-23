@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 
 	"github.com/kuromii5/chat-bot-auth-service/config"
 	"github.com/kuromii5/chat-bot-auth-service/internal/adapters/postgres"
@@ -17,9 +19,11 @@ import (
 	authhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/auth"
 	authmw "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/middleware"
 	userhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/user"
+	grpcuserhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/grpc/user"
 	"github.com/kuromii5/chat-bot-auth-service/internal/service/session"
 	tracingsvc "github.com/kuromii5/chat-bot-auth-service/internal/service/tracing"
 	userservice "github.com/kuromii5/chat-bot-auth-service/internal/service/user"
+	authv1 "github.com/kuromii5/chat-bot-shared/proto/auth/v1"
 	"github.com/kuromii5/chat-bot-shared/jwt"
 	"github.com/kuromii5/chat-bot-shared/tracing"
 	"github.com/kuromii5/chat-bot-shared/validator"
@@ -78,10 +82,24 @@ func main() {
 	httpserver.InitMetrics(ctx, cfg.Metrics.Port)
 	server := httpserver.NewServer(cfg.Server.Host, cfg.Server.Port, router)
 
+	grpcServer := grpc.NewServer()
+	authv1.RegisterUserServiceServer(grpcServer, grpcuserhandler.NewHandler(userSvc))
+
+	grpcLis, err := net.Listen("tcp", ":"+cfg.Server.GRPCPort)
+	if err != nil {
+		logrus.WithError(err).Fatal("Failed to listen on gRPC port")
+	}
+
 	errChan := make(chan error, 1)
 	go func() {
 		logrus.Infof("server address: %s", server.Addr())
 		if err := server.Start(); err != nil {
+			errChan <- err
+		}
+	}()
+	go func() {
+		logrus.Infof("gRPC server listening on :%s", cfg.Server.GRPCPort)
+		if err := grpcServer.Serve(grpcLis); err != nil {
 			errChan <- err
 		}
 	}()
@@ -102,6 +120,8 @@ func main() {
 		if err := server.Shutdown(shutdownCtx); err != nil {
 			logrus.WithError(err).Error("HTTP server shutdown failed, forcing close")
 		}
+
+		grpcServer.GracefulStop()
 
 		if err := pg.DB.Close(); err != nil {
 			logrus.WithError(err).Error("Database close failed")

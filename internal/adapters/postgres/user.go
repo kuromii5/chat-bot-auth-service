@@ -62,3 +62,13 @@ func (r *postgres) GetUserByEmail(ctx context.Context, email string) (*domain.Us
 
 	return &user, nil
 }
+
+func (r *postgres) GetUserByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
+	var user domain.User
+	err := r.DB.GetContext(ctx, &user, getUserByIDQuery, id)
+	if err != nil {
+		return nil, fmt.Errorf("user not found: %w", err)
+	}
+
+	return &user, nil
+}

@@ -61,4 +61,10 @@ const (
 		FROM auth.users
 		WHERE email = $1
 	`
+
+	getUserByIDQuery = `
+		SELECT id, email, email_notifications_enabled
+		FROM auth.users
+		WHERE id = $1
+	`
 )
