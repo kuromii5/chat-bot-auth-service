@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	_ "net/http/pprof"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -13,6 +14,7 @@ import (
 func InitMetrics(ctx context.Context, port string) {
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.Handler())
+	mux.Handle("/debug/pprof/", http.DefaultServeMux)
 	server := &http.Server{
 		Addr:              ":" + port,
 		Handler:           mux,
