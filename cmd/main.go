@@ -15,16 +15,16 @@ import (
 	"github.com/kuromii5/chat-bot-auth-service/internal/adapters/postgres"
 	tracingadapter "github.com/kuromii5/chat-bot-auth-service/internal/adapters/tracing"
 	apperrors "github.com/kuromii5/chat-bot-auth-service/internal/errors"
+	grpcuserhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/grpc/user"
 	httpserver "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http"
 	authhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/auth"
 	authmw "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/middleware"
 	userhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/user"
-	grpcuserhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/grpc/user"
 	"github.com/kuromii5/chat-bot-auth-service/internal/service/session"
 	tracingsvc "github.com/kuromii5/chat-bot-auth-service/internal/service/tracing"
 	userservice "github.com/kuromii5/chat-bot-auth-service/internal/service/user"
-	authv1 "github.com/kuromii5/chat-bot-shared/proto/auth/v1"
 	"github.com/kuromii5/chat-bot-shared/jwt"
+	authv1 "github.com/kuromii5/chat-bot-shared/proto/auth/v1"
 	"github.com/kuromii5/chat-bot-shared/tracing"
 	"github.com/kuromii5/chat-bot-shared/validator"
 	"github.com/kuromii5/chat-bot-shared/wrapper"
@@ -85,7 +85,7 @@ func main() {
 	grpcServer := grpc.NewServer()
 	authv1.RegisterUserServiceServer(grpcServer, grpcuserhandler.NewHandler(userSvc))
 
-	grpcLis, err := net.Listen("tcp", ":"+cfg.Server.GRPCPort)
+	grpcLis, err := (&net.ListenConfig{}).Listen(ctx, "tcp", ":"+cfg.Server.GRPCPort)
 	if err != nil {
 		logrus.WithError(err).Fatal("Failed to listen on gRPC port")
 	}

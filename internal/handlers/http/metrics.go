@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	_ "net/http/pprof"
+	_ "net/http/pprof" //nolint:gosec
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
