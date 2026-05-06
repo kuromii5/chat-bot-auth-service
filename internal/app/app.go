@@ -36,7 +36,7 @@ func New(ctx context.Context, cfg *config.Config) (*App, error) {
 	var a App
 
 	shutdownTracer, err := tracing.InitTracer(
-		context.Background(),
+		ctx,
 		"auth-service",
 		cfg.Tracing.Endpoint,
 		cfg.Tracing.Sampler,
@@ -46,7 +46,7 @@ func New(ctx context.Context, cfg *config.Config) (*App, error) {
 	}
 	a.closer.Add(shutdownTracer)
 
-	pg, err := postgres.New(&cfg.Database)
+	pg, err := postgres.New(&cfg.Database) //nolint:contextcheck
 	if err != nil {
 		return nil, fmt.Errorf("connect to database: %w", err)
 	}
@@ -81,7 +81,7 @@ func New(ctx context.Context, cfg *config.Config) (*App, error) {
 		return nil
 	})
 
-	grpcLis, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", ":"+cfg.Server.GRPCPort)
+	grpcLis, err := (&net.ListenConfig{}).Listen(ctx, "tcp", ":"+cfg.Server.GRPCPort)
 	if err != nil {
 		return nil, fmt.Errorf("listen gRPC port: %w", err)
 	}
