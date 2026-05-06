@@ -2,29 +2,15 @@ package main
 
 import (
 	"context"
-	"net"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
 
 	"github.com/kuromii5/chat-bot-auth-service/config"
-	"github.com/kuromii5/chat-bot-auth-service/internal/adapters/postgres"
-	tracingadapter "github.com/kuromii5/chat-bot-auth-service/internal/adapters/tracing"
+	"github.com/kuromii5/chat-bot-auth-service/internal/app"
 	apperrors "github.com/kuromii5/chat-bot-auth-service/internal/errors"
-	grpcuserhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/grpc/user"
-	httpserver "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http"
-	authhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/auth"
-	authmw "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/middleware"
-	userhandler "github.com/kuromii5/chat-bot-auth-service/internal/handlers/http/user"
-	"github.com/kuromii5/chat-bot-auth-service/internal/service/session"
-	tracingsvc "github.com/kuromii5/chat-bot-auth-service/internal/service/tracing"
-	userservice "github.com/kuromii5/chat-bot-auth-service/internal/service/user"
-	"github.com/kuromii5/chat-bot-shared/jwt"
-	authv1 "github.com/kuromii5/chat-bot-shared/proto/auth/v1"
 	"github.com/kuromii5/chat-bot-shared/tracing"
 	"github.com/kuromii5/chat-bot-shared/validator"
 	"github.com/kuromii5/chat-bot-shared/wrapper"
@@ -39,96 +25,19 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	shutdownTracer, err := tracing.InitTracer(
-		context.Background(),
-		"auth-service",
-		cfg.Tracing.Endpoint,
-		cfg.Tracing.Sampler,
-	)
+	a, err := app.New(ctx, cfg)
 	if err != nil {
-		logrus.WithError(err).Fatal("Failed to init OpenTelemetry")
-	}
-	defer func() {
-		if err := shutdownTracer(context.Background()); err != nil {
-			logrus.WithError(err).Error("Failed to shutdown tracer")
-		}
-	}()
-
-	pg, err := postgres.New(&cfg.Database)
-	if err != nil {
-		logrus.WithError(err).Fatal("Failed to connect to database")
+		logrus.WithError(err).Fatal("Failed to initialize app")
 	}
 
-	jwtManager := jwt.NewJWTManager(
-		cfg.JWT.Secret,
-		cfg.JWT.AccessTokenExpiry,
-		cfg.JWT.RefreshTokenExpiry,
-	)
-
-	tracingPG := tracingadapter.NewRepo(pg)
-
-	userSvc := userservice.NewService(tracingPG)
-	sessionSvc := session.NewService(tracingPG, tracingPG, jwtManager)
-
-	jail := authmw.NewIPJail(cfg.RateLimit.MaxFailures, cfg.RateLimit.JailMinutes)
-
-	router := httpserver.NewRouter(
-		userhandler.NewHandler(tracingsvc.NewUserService(userSvc)),
-		authhandler.NewHandler(tracingsvc.NewAuthService(sessionSvc)),
-		cfg.JWT.Secret,
-		jail,
-	)
-
-	httpserver.InitMetrics(ctx, cfg.Metrics.Port)
-	server := httpserver.NewServer(cfg.Server.Host, cfg.Server.Port, router)
-
-	grpcServer := grpc.NewServer()
-	authv1.RegisterUserServiceServer(grpcServer, grpcuserhandler.NewHandler(userSvc))
-
-	grpcLis, err := (&net.ListenConfig{}).Listen(ctx, "tcp", ":"+cfg.Server.GRPCPort)
-	if err != nil {
-		logrus.WithError(err).Fatal("Failed to listen on gRPC port")
+	if err := a.Run(ctx); err != nil {
+		logrus.WithError(err).Error("App error")
+	} else {
+		logrus.Info("Shutting down...")
 	}
 
-	errChan := make(chan error, 1)
-	go func() {
-		logrus.Infof("server address: %s", server.Addr())
-		if err := server.Start(); err != nil {
-			errChan <- err
-		}
-	}()
-	go func() {
-		logrus.Infof("gRPC server listening on :%s", cfg.Server.GRPCPort)
-		if err := grpcServer.Serve(grpcLis); err != nil {
-			errChan <- err
-		}
-	}()
-
-	select {
-	case err := <-errChan:
-		logrus.WithError(err).Fatal("Failed to start server")
-		if closeErr := pg.DB.Close(); closeErr != nil {
-			logrus.WithError(closeErr).Error("Database close failed")
-		}
-		return
-	case <-ctx.Done():
-		logrus.Info("Server shutdown...")
-
-		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 15*time.Second)
-		defer shutdownCancel()
-
-		if err := server.Shutdown(shutdownCtx); err != nil {
-			logrus.WithError(err).Error("HTTP server shutdown failed, forcing close")
-		}
-
-		grpcServer.GracefulStop()
-
-		if err := pg.DB.Close(); err != nil {
-			logrus.WithError(err).Error("Database close failed")
-		}
-	}
-
-	logrus.Info("Service shutdown successfully")
+	a.Close(context.Background())
+	logrus.Info("Service stopped")
 }
 
 func setupLogger(level string) {
